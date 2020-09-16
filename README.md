@@ -29,6 +29,10 @@ package.json
 }
 ```
 
+```bash
+npm run release
+```
+
 ## Commands
 
 - **help** -> get command list
@@ -53,48 +57,40 @@ Check commit message on
 },
 ```
 
-Schema of message:
+Schemas of message:
+
+- `<type>: <description>` - simple variant
+- `<type>(scope): <description>` - with some scope
+- `<type>!: <description>` - breaking change
+- `<type>(scope)!: <description>` - breaking change with scope
+
+Example with breaking change:
 
 ```bash
-<type>: <description>
-```
+refactor(core): Migrate on new solution
 
-or
-
-```bash
-<type>(scope): <description>
-```
-
-or
-
-```bash
-<type>!: <description>
-```
-
-or
-
-```bash
-<type>(scope)!: <description>
+BREAKING CHANGES: should upgrade version
+Some specs...
 ```
 
 ## Available types
 
-- break - MAJOR
-- feat - MINOR
-- build - PATCH
-- chore - PATCH
-- ci - PATCH
-- docs - PATCH
-- fix - PATCH
-- perf - PATCH
-- refactor - PATCH
-- revert - PATCH
-- style - PATCH
-- test - PATCH
+- **break** - `MAJOR` Breaking changes
+- **feat** - `MINOR` Features
+- **build** - `PATCH` Build system or external dependencies
+- **chore** - `PATCH` Chore
+- **ci** - `PATCH` Continuous Integration
+- **docs** - `PATCH` Documentation
+- **fix** - `PATCH` Bug Fixes
+- **perf** - `PATCH` Performance
+- **refactor** - `PATCH` Refactoring
+- **revert** - `PATCH` Revert code
+- **style** - `PATCH` Styles and formatting
+- **test** - `PATCH` Tests
 
-For MAJOR can be used `!` (example `refactor!: new lib`).
+For `MAJOR` can be used `!` (example `refactor!: new lib`).
 
-For MAJOR also can be used `BREAKING CHANGES:` or `BREAKING CHANGE:` in description of commit.
+For `MAJOR` also can be used `BREAKING CHANGES:` or `BREAKING CHANGE:` in description of commit.
 
 ## Example CI
 
