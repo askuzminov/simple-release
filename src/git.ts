@@ -1,7 +1,8 @@
 import { RawLog } from './types';
 import { ex } from './utils';
 
-const delim = '###END%!@^%$';
+const DELIM = '###DELIM%!@^%$###';
+const ESCAPE = '###ESCAPE%!@^%$###';
 
 export const fetchAll = () => ex(`git fetch remote --tags`);
 
@@ -16,14 +17,31 @@ export const getTag = (): string => {
 };
 
 export const getCommitsRaw = (from: string, to: string) =>
-  ex(`git log ${from}..${to} --pretty=format:'{ "short": "%h", "hash": "%H", "title": "%s", "body": "%b" }${delim}'`);
+  ex(
+    `git log ${from}..${to} --pretty=format:'{ "short": ${ESCAPE}%h${ESCAPE}, "hash": ${ESCAPE}%H${ESCAPE}, "title": ${ESCAPE}%s${ESCAPE}, "body": ${ESCAPE}%b${ESCAPE} }${DELIM}'`
+  );
+
+const escaper = (str: string) => JSON.stringify(str);
+
+const esc = (str: string) =>
+  str
+    .trim()
+    .split(ESCAPE)
+    .map((s, i) => (i % 2 ? escaper(s) : s))
+    .join('');
+
+const parse = (str: string) => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    // tslint:disable-next-line: no-console
+    console.log(str);
+    throw e;
+  }
+};
 
 export const getCommits = () =>
-  getCommitsRaw(getTag(), getHash())
-    .split(delim)
-    .map(s => s.trim())
-    .filter(Boolean)
-    .map(s => JSON.parse(s.replace(/\n/g, '\\n')) as unknown) as RawLog[];
+  getCommitsRaw(getTag(), getHash()).split(DELIM).map(esc).filter(Boolean).map(parse) as RawLog[];
 
 export const writeGit = (version: string) => {
   ex('git add .');
