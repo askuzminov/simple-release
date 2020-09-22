@@ -1,10 +1,10 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { promises as fs } from 'fs';
 import { join } from 'path';
 
-export const getChangelog = (title: string, path = 'CHANGELOG.md') => {
+export async function getChangelog(title: string, path = 'CHANGELOG.md') {
   let changelog = '';
   try {
-    changelog = readFileSync(join(process.cwd(), path), 'utf8');
+    changelog = await fs.readFile(join(process.cwd(), path), 'utf8');
   } catch {
     //
   }
@@ -14,8 +14,8 @@ export const getChangelog = (title: string, path = 'CHANGELOG.md') => {
   }
 
   return changelog;
-};
+}
 
-export function writeChangelog(text: string, path = 'CHANGELOG.md') {
-  writeFileSync(join(process.cwd(), path), text, 'utf8');
+export async function writeChangelog(text: string, path = 'CHANGELOG.md') {
+  await fs.writeFile(join(process.cwd(), path), text, 'utf8');
 }

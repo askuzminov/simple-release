@@ -1,20 +1,25 @@
+import { log } from './log';
 import { ParseConfig } from './types';
-import { ex } from './utils';
+import { sp } from './utils';
 
-export function nextVersion(config: ParseConfig, preid?: string | boolean) {
-  return ex(
-    `npm version ${
-      preid
-        ? `prerelease${typeof preid === 'string' ? ` --preid=${preid}` : ''}`
-        : config.isMajor
-        ? 'major'
-        : config.isMinor
-        ? 'minor'
-        : 'patch'
-    } --no-git-tag-version`
-  );
+const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+
+export async function nextVersion(config: ParseConfig, preid?: string | boolean) {
+  const version = preid ? 'prerelease' : config.isMajor ? 'major' : config.isMinor ? 'minor' : 'patch';
+  log('info', 'Version', version);
+  const params = ['version', version];
+
+  if (typeof preid === 'string') {
+    log('info', 'Version', `preid ${preid}`);
+    params.push(`--preid=${preid}`);
+  }
+
+  params.push('--no-git-tag-version');
+
+  await sp(npmCmd, params, { stdio: 'inherit' });
 }
 
-export function publish(registry: string, preid?: string | boolean) {
-  ex(`npm publish --tag ${preid ? 'canary' : 'latest'} --registry ${registry}`);
+export async function publish(registry: string, preid?: string | boolean) {
+  log('info', 'Publish', `Start publish in registry ${registry}`);
+  await sp(npmCmd, ['publish', '--tag', preid ? 'canary' : 'latest', '--registry', registry], { stdio: 'inherit' });
 }

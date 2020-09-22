@@ -7,10 +7,9 @@ import { rParse } from './parser';
 
 // tslint:disable: no-console
 
-const commit = readFileSync(
-  join(process.cwd(), process.env.GIT_PARAMS || process.env.HUSKY_GIT_PARAMS || '.git/COMMIT_EDITMSG'),
-  'utf8'
-);
+const { GIT_PARAMS, HUSKY_GIT_PARAMS } = process.env;
+
+const commit = readFileSync(join(process.cwd(), GIT_PARAMS || HUSKY_GIT_PARAMS || '.git/COMMIT_EDITMSG'), 'utf8');
 
 const parsed = rParse.exec(commit);
 const example =

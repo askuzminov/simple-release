@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { spawn, SpawnOptions } from 'child_process';
 import { Pack, Repo } from './types';
 
 const rRepo = /([^/.]+)[/.]+([^/.]+)[/.]+[^/.]+$/;
@@ -18,7 +18,25 @@ export function getDate() {
   return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
 }
 
-export const ex = (cmd: string) => execSync(cmd, { encoding: 'utf8' }).trim();
+export function sp(command: string, args?: string[], options?: SpawnOptions) {
+  return new Promise<string>((resolve, reject) => {
+    const stream = spawn(command, args, options);
+    let result = '';
+    let error = '';
+
+    stream.stdout?.on('data', (data: Buffer | string) => {
+      result += data.toString();
+    });
+
+    stream.stderr?.on('data', (data: Buffer | string) => {
+      error += data.toString();
+    });
+
+    stream.on('exit', code => {
+      code ? reject(error) : resolve(result.trim());
+    });
+  });
+}
 
 export function arg<T extends Record<string, string | boolean>>(def: T): T {
   const ar = process.argv.slice(2);
