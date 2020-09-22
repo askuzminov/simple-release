@@ -47,7 +47,7 @@ npm run release
 
 ## Lint
 
-Check commit message on
+Check commit message on:
 
 ```json
 "husky": {
@@ -91,6 +91,22 @@ Some specs...
 For `MAJOR` can be used `!` (example `refactor!: new lib`).
 
 For `MAJOR` also can be used `BREAKING CHANGES:` or `BREAKING CHANGE:` in description of commit.
+
+## Scripts
+
+Used standard scripts for <https://docs.npmjs.com/cli/version>.
+
+```json
+"scripts": {
+  "preversion": "npm test",
+  "version": "npm run build",
+  "postversion": "npm run clean"
+}
+```
+
+And when enable publish, used standard scripts for <https://docs.npmjs.com/cli/publish>.
+
+See full list of scripts in <https://docs.npmjs.com/misc/scripts#description>.
 
 ## Example CI
 
