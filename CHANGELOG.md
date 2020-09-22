@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.0.2](https://github.com/askuzminov/simple-release/compare/v1.0.1...v1.0.2) (2020-9-22)
+
+### Build system or external dependencies
+
+- update dependencies ([ce7c290](https://github.com/askuzminov/simple-release/commit/ce7c290048341f91a96f7ae4e8e5139d55a72bbe))
+
+### Documentation
+
+- Add scripts info ([a7be287](https://github.com/askuzminov/simple-release/commit/a7be287b17722c3c8f78f719535373dfa89120fb))
+
+### Bug Fixes
+
+- improve work with large git ([d7a5aa5](https://github.com/askuzminov/simple-release/commit/d7a5aa5f705e1fca55234da49342f732d253cc1c))
+
+```md
+- Avoid limit of buffer
+- Rewrite to non blocking code
+- Improve logging
+
+```
+
+
 ## [v1.0.1](https://github.com/askuzminov/simple-release/compare/v1.0.0...v1.0.1) (2020-9-16)
 
 ### Documentation
