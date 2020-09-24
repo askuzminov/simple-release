@@ -4,6 +4,7 @@ import { arg } from './utils';
 export const ARG = arg<{
   help: boolean;
   prerelease: boolean | string;
+  'enable-prerelease': boolean;
   'disable-push': boolean;
   'disable-git': boolean;
   'disable-md': boolean;
@@ -13,6 +14,7 @@ export const ARG = arg<{
 }>({
   help: false,
   prerelease: false,
+  'enable-prerelease': false,
   'disable-push': false,
   'disable-git': false,
   'disable-md': false,
@@ -26,6 +28,7 @@ if (ARG.help) {
   log('info', 'Help', 'help -> get command list');
   log('info', 'Help', 'prerelease -> only up version');
   log('info', 'Help', 'prerelease=SOME.NEW.VERSION -> only up version with custom ID');
+  log('info', 'Help', 'enable-prerelease -> force full process');
   log('info', 'Help', 'disable-push -> prevent git push');
   log('info', 'Help', 'disable-git -> prevent git commit and tag');
   log('info', 'Help', 'disable-md -> prevent write CHANGELOG.md');

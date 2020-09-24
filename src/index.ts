@@ -39,7 +39,7 @@ async function run() {
     log('info', 'Version', version);
     log('info', 'Markdown', md);
 
-    if (!ARG.prerelease) {
+    if (!ARG.prerelease || ARG['enable-prerelease']) {
       if (!ARG['disable-md']) {
         await writeChangelog(`${TITLE}${md}${changelog}`);
       }
@@ -58,16 +58,22 @@ async function run() {
         } else if (!repo) {
           log('warn', 'Package', 'No repository.url in package.json');
         } else {
-          await githubRelese({
-            token: GH_TOKEN,
-            path: `/repos/${repo.user}/${repo.repository}/releases`,
-            setup: {
-              tag_name: version,
-              name: version,
-              body: md,
-              prerelease: false,
-            },
-          }).catch(e => log('error', 'Github', e));
+          try {
+            log('info', 'Github', `Run release for ${repo.user}/${repo.repository}/`);
+            const out = await githubRelese({
+              token: GH_TOKEN,
+              path: `/repos/${repo.user}/${repo.repository}/releases`,
+              setup: {
+                tag_name: version,
+                name: version,
+                body: md,
+                prerelease: false,
+              },
+            });
+            log('info', 'Github', out);
+          } catch (e) {
+            log('error', 'Github', e);
+          }
         }
       }
     }

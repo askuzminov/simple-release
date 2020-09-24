@@ -38,6 +38,7 @@ npm run release
 - **help** -> get command list
 - **prerelease** -> only up version, not git changes and release
 - **prerelease=SOME.NEW.VERSION** -> only up version with custom ID
+- **enable-prerelease** -> force full process
 - **disable-push** -> prevent git push
 - **disable-git** -> prevent git commit and tag
 - **disable-md** -> prevent write CHANGELOG.md
