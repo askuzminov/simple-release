@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.0.3](https://github.com/askuzminov/simple-release/compare/v1.0.2...v1.0.3) (2020-9-24)
+
+### Bug Fixes
+
+- Add ignore for lint ([8f2722f](https://github.com/askuzminov/simple-release/commit/8f2722ffe6eb67e4bb3e714f4eecd79268191b46))
+
 ## [v1.0.2](https://github.com/askuzminov/simple-release/compare/v1.0.1...v1.0.2) (2020-9-22)
 
 ### Build system or external dependencies
