@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.0.4](https://github.com/askuzminov/simple-release/compare/v1.0.3...v1.0.4) (2020-9-24)
+
+### Bug Fixes
+
+- log for Github release ([8b0aae9](https://github.com/askuzminov/simple-release/commit/8b0aae9c2aa9191609dbbe72ce8aed548c77d415))
+
 ## [v1.0.3](https://github.com/askuzminov/simple-release/compare/v1.0.2...v1.0.3) (2020-9-24)
 
 ### Bug Fixes
