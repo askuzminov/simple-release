@@ -14,3 +14,5 @@ export const whitelist: Record<string, string> = {
   style: 'Styles and formatting',
   test: 'Tests',
 };
+
+export const rIgnore = /^((Merge pull request)|(Merge remote-tracking branch)|(Automatic merge)|((Auto-merged|Merged) (.*?) (in|into) )|(Merge branch)|(R|r)evert|fixup|squash)/;

@@ -92,6 +92,21 @@ For `MAJOR` can be used `!` (example `refactor!: new lib`).
 
 For `MAJOR` also can be used `BREAKING CHANGES:` or `BREAKING CHANGE:` in description of commit.
 
+## Ignored commits in lint
+
+- Merge pull request
+- Merge remote-tracking branch
+- Automatic merge
+- Auto-merged ... in ...
+- Auto-merged ... into ...
+- Merged ... in ...
+- Merged ... into ...
+- Merge branch
+- Revert
+- revert
+- fixup
+- squash
+
 ## Scripts
 
 Used standard scripts for <https://docs.npmjs.com/cli/version>.

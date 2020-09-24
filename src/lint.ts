@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { whitelist } from './config';
+import { rIgnore, whitelist } from './config';
 import { rParse } from './parser';
 
 // tslint:disable: no-console
@@ -15,7 +15,8 @@ const parsed = rParse.exec(commit);
 const example =
   '<type>: <description> or <type>(scope): <description> or <type>!: <description> or <type>(scope)!: <description>';
 
-function error(): never {
+function error(text: string): never {
+  console.error(text);
   console.error(`Schema of message: ${example}`);
   console.error('Current message:');
   console.error(commit);
@@ -23,18 +24,20 @@ function error(): never {
 }
 
 if (!parsed) {
-  console.error('Incorrect format of commit message');
-  error();
+  if (rIgnore.test(commit)) {
+    console.warn('Commit message was ignored: ', commit);
+    process.exit(0);
+  } else {
+    error('Incorrect format of commit message');
+  }
 }
 
 const [, type] = parsed;
 
 if (!type) {
-  console.error('Type required in commit message');
-  error();
+  error('Type required in commit message');
 }
 
 if (!whitelist[type]) {
-  console.error(`Type "${type}" should be one of: ${Object.keys(whitelist).join(', ')}`);
-  error();
+  error(`Type "${type}" should be one of: ${Object.keys(whitelist).join(', ')}`);
 }
