@@ -1,6 +1,6 @@
 {
   "name": "@askuzminov/simple-release",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "author": {
     "name": "Kuzminov Alexander",
@@ -51,7 +51,8 @@
     "tslint:fix": "npm run tslint -- --fix",
     "lint": "npm run tslint",
     "release": "node ./dist/cjs/index.js",
-    "dev": "ts-node -T src disable-git disable-github"
+    "dev:no-git": "ts-node -T src disable-git disable-github",
+    "dev:no-push": "ts-node -T src disable-push disable-github"
   },
   "devDependencies": {
     "@types/node": "~10.17.35",

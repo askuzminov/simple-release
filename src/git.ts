@@ -52,8 +52,18 @@ export const addChangelog = async () => {
 };
 
 export const writeGit = async (version: string) => {
+  log('info', 'Git', `Add package-lock.json`);
+  await sp('git', ['add', 'package-lock.json'], { stdio: 'inherit' }).catch(() => {
+    log('warn', 'Git', `File "package-lock.json" not found.`);
+  });
+
+  log('info', 'Git', `Add package.json`);
+  await sp('git', ['add', 'package.json'], { stdio: 'inherit' });
+
   log('info', 'Git', `Commit version ${version}`);
   await sp('git', ['commit', '-m', `chore(release): ${version} [skip ci]`], { stdio: 'inherit' });
+
+  log('info', 'Git', `Tag version ${version}`);
   await sp('git', ['tag', '-a', version, '-m', `Release ${version}`], { stdio: 'inherit' });
 };
 
