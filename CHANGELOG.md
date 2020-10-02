@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.0.5](https://github.com/askuzminov/simple-release/compare/v1.0.4...v1.0.5) (2020-10-2)
+
+### Documentation
+
+- setup git ([1bc0ac4](https://github.com/askuzminov/simple-release/commit/1bc0ac4276e10e7ae4399c1de1aabfe6abb79321))
+
+  > - Github Actions
+  > - Common example
+
+### Bug Fixes
+
+- Parse body as markdown ([526091c](https://github.com/askuzminov/simple-release/commit/526091c9aaad0b29f1fa77c8da72325832380833))
+
+  > - Add [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  > - **Some** *specs* added...
+
+- Parse repository without extension ([ab3ef81](https://github.com/askuzminov/simple-release/commit/ab3ef8142bb262312a7b63eecd6bf89235a05dc7))
+- Git add only changelog.md ([f5a9a41](https://github.com/askuzminov/simple-release/commit/f5a9a4182d7058eee79c05f0dfc33b21434ac492))
+
+### Styles and formatting
+
+- Pretty error message ([5a62e2f](https://github.com/askuzminov/simple-release/commit/5a62e2ff2249377d03d22c1a9ccc596b13cbf733))
+
 ## [v1.0.4](https://github.com/askuzminov/simple-release/compare/v1.0.3...v1.0.4) (2020-9-24)
 
 ### Bug Fixes
