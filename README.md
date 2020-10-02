@@ -140,3 +140,25 @@ else
   npx @askuzminov/simple-release publish-github publish-npmjs prerelease=$BRANCH_NAME.$BUILD_ID
 fi
 ```
+
+### Github actions
+
+Use fetch-depth for full
+
+```yml
+- name: Checkout
+  uses: actions/checkout@v2
+  with: { fetch-depth: 0 }
+```
+
+### Setup GIT example
+
+Setup branch for push
+
+```bash
+git config --global push.default current
+git config --local user.email "bot@ci.com"
+git config --local user.name "CI"
+mkdir -p ~/.ssh
+ssh-keyscan github.com > ~/.ssh/known_hosts
+```
