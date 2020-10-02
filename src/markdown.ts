@@ -1,17 +1,25 @@
 import { whitelist } from './config';
 import { Markdown } from './types';
 
+const last = (arr: string[]) => arr[arr.length - 1].slice(-1) !== '\n';
+
 export function makeMD({ url, config, version, tag, date }: Markdown) {
-  let md = `\n## ${url ? `[${version}](${url}/compare/${tag}...${version})` : version} (${date})\n`;
+  const md = ['', `## ${url ? `[${version}](${url}/compare/${tag}...${version})` : version} (${date})`];
 
   // tslint:disable-next-line: forin
   for (const group in config.groups) {
-    md += `\n### ${whitelist[group] || group}\n\n`;
+    if (last(md)) {
+      md.push('');
+    }
+
+    md.push(`### ${whitelist[group] || group}`, '');
 
     for (const item of config.groups[group]) {
-      md += `- ${item}\n`;
+      md.push(`- ${item}`);
     }
   }
 
-  return md;
+  md.push('');
+
+  return md.join('\n');
 }

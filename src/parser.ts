@@ -24,6 +24,10 @@ export function parseItem(log: RawLog): Message {
       };
 }
 
+function prepareBody(body?: string): string {
+  return body ? `\n\n  > ${body.trim().split(/\n/).join('\n  > ')}\n` : '';
+}
+
 export function parse(commits: RawLog[], url: string) {
   let isMajor = false;
   let isMinor = false;
@@ -44,7 +48,7 @@ export function parse(commits: RawLog[], url: string) {
     (groupsRaw[item.type] ??= []).push(
       `${item.scope ? `**${item.scope}**: ` : ''}${item.content}${
         url ? ` ([${item.shortHash}](${url}/commit/${item.hash}))` : ''
-      }${item.body ? `\n\n\`\`\`md\n${item.body}\n\`\`\`\n` : ''}`
+      }${prepareBody(item.body)}`
     );
 
     isEmpty = false;

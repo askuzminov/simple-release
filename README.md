@@ -6,7 +6,7 @@ Full auto pipeline for simple releases your packages.
 - Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines
 - Generate CHANGELOG.md
 - Update package.json, package-lock.json
-- Parse body commits, support utf-8 and emoji 🚀
+- Parse body commits as Markdown, support utf-8 and emoji 🚀
 - Commit, tag and push new version
 - Upload release on Github
 - Upload package on Github
@@ -64,6 +64,15 @@ Schemas of message:
 - `<type>(scope): <description>` - with some scope
 - `<type>!: <description>` - breaking change
 - `<type>(scope)!: <description>` - breaking change with scope
+
+Example with body
+
+```bash
+feat(ABC-123): New solution
+
+- Add [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+- **Some** *specs* added...
+```
 
 Example with breaking change:
 
