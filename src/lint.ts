@@ -2,8 +2,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { rIgnore, whitelist } from './config';
-import { rParse } from './parser';
+import { rIgnore, rParse, whitelist } from './config';
 
 // tslint:disable: no-console
 

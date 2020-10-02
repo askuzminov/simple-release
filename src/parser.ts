@@ -1,7 +1,5 @@
+import { rBreak, rParse } from './config';
 import { Message, RawLog } from './types';
-
-export const rParse = /^(\w*)(?:\(([\w$.\-*/ ]*)\))?(!)?: (.*)$/m;
-const rBreak = /BREAKING CHANGES?:/i;
 
 export function parseItem(log: RawLog): Message {
   const parsed = rParse.exec(log.title);

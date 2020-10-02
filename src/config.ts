@@ -18,3 +18,9 @@ export const whitelist: Record<string, string> = {
 };
 
 export const rIgnore = /^((Merge pull request)|(Merge remote-tracking branch)|(Automatic merge)|((Auto-merged|Merged) (.*?) (in|into) )|(Merge branch)|(R|r)evert|fixup|squash)/;
+
+export const rRepo = /([^/.]+)[/.]+([^/.]+)(?:\.[^/.]+)?$/;
+
+export const rParse = /^(\w*)(?:\(([\w$.\-*/ ]*)\))?(!)?: (.*)$/m;
+
+export const rBreak = /BREAKING CHANGES?:/i;

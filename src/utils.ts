@@ -1,7 +1,6 @@
 import { spawn, SpawnOptions } from 'child_process';
+import { rRepo } from './config';
 import { Pack, Repo } from './types';
-
-const rRepo = /([^/.]+)[/.]+([^/.]+)[/.]+[^/.]+$/;
 
 export function getRepo(pack: Pack) {
   const parsed = rRepo.exec((typeof pack.repository === 'object' && pack.repository?.url) || '');
