@@ -1,3 +1,4 @@
+import { CHANGELOG_FILE } from './config';
 import { log } from './log';
 import { RawLog } from './types';
 import { sp } from './utils';
@@ -45,9 +46,13 @@ const parse = (str: string) => {
 export const getCommits = async () =>
   (await getCommitsRaw(await getTag(), await getHash())).split(DELIM).map(esc).filter(Boolean).map(parse) as RawLog[];
 
+export const addChangelog = async () => {
+  log('info', 'Git', `Add ${CHANGELOG_FILE}`);
+  await sp('git', ['add', CHANGELOG_FILE], { stdio: 'inherit' });
+};
+
 export const writeGit = async (version: string) => {
   log('info', 'Git', `Commit version ${version}`);
-  await sp('git', ['add', '.'], { stdio: 'inherit' });
   await sp('git', ['commit', '-m', `chore(release): ${version} [skip ci]`], { stdio: 'inherit' });
   await sp('git', ['tag', '-a', version, '-m', `Release ${version}`], { stdio: 'inherit' });
 };

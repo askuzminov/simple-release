@@ -1,5 +1,7 @@
 export const TITLE = `# Changelog\n\nAll notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.\n`;
 
+export const CHANGELOG_FILE = 'CHANGELOG.md';
+
 export const whitelist: Record<string, string> = {
   break: 'Breaking changes',
   feat: 'Features',

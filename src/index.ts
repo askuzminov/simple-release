@@ -8,7 +8,7 @@ process.on('unhandledRejection', error => {
 import { ARG } from './arg';
 import { getChangelog, writeChangelog } from './changelog';
 import { TITLE } from './config';
-import { getCommits, getTag, pushGit, writeGit } from './git';
+import { addChangelog, getCommits, getTag, pushGit, writeGit } from './git';
 import { log } from './log';
 import { makeMD } from './markdown';
 import { nextVersion, publish } from './npm';
@@ -45,6 +45,10 @@ async function run() {
       }
 
       if (!ARG['disable-git']) {
+        if (!ARG['disable-md']) {
+          await addChangelog();
+        }
+
         await writeGit(version);
 
         if (!ARG['disable-push']) {
