@@ -1,4 +1,4 @@
-import { rBreak, rParse } from './config';
+import { OTHERS, rBreak, rParse } from './config';
 import { Message, RawLog } from './types';
 
 export function parseItem(log: RawLog): Message {
@@ -15,7 +15,7 @@ export function parseItem(log: RawLog): Message {
         major: parsed[3] === '!',
       }
     : {
-        type: 'others',
+        type: OTHERS,
         content: log.title,
         shortHash: log.short,
         hash: log.hash,
@@ -55,7 +55,7 @@ export function parse(commits: RawLog[], url: string) {
   }
 
   const groups = Object.keys(groupsRaw)
-    .sort()
+    .sort((a, b) => (a === OTHERS ? 1 : b === OTHERS ? -1 : a > b ? 1 : a < b ? -1 : 0))
     .reduce((obj, key) => {
       obj[key] = groupsRaw[key];
       return obj;

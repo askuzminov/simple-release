@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 process.on('unhandledRejection', error => {
-  log('error', 'Lint', error);
+  log('error', 'Error', error);
   process.exit(1);
 });
 

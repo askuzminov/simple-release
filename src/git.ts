@@ -10,9 +10,9 @@ export const fetchAll = () => sp('git', ['fetch', 'remote', '--tags']);
 
 export const getHash = () => sp('git', ['rev-parse', 'HEAD']);
 
-export const getTag = (): Promise<string> => {
+export const getTag = async (): Promise<string> => {
   try {
-    return sp('git', ['describe', '--tags', '--abbrev=0', '--first-parent']);
+    return await sp('git', ['describe', '--tags', '--abbrev=0', '--first-parent']);
   } catch {
     return sp('git', ['rev-list', '--max-parents=0', 'HEAD']);
   }
@@ -44,7 +44,12 @@ const parse = (str: string) => {
 };
 
 export const getCommits = async () =>
-  (await getCommitsRaw(await getTag(), await getHash())).split(DELIM).map(esc).filter(Boolean).map(parse) as RawLog[];
+  (await getCommitsRaw(await getTag(), await getHash()))
+    .split(DELIM)
+    .map(esc)
+    .filter(Boolean)
+    .map(parse)
+    .reverse() as RawLog[];
 
 export const addChangelog = async () => {
   log('info', 'Git', `Add ${CHANGELOG_FILE}`);
