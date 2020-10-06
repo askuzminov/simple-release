@@ -25,7 +25,7 @@ export function parseItem(log: RawLog): Message {
 }
 
 function prepareBody(body?: string): string {
-  return body ? `\n\n  > ${body.trim().split(/\n/).join('\n  > ')}\n` : '';
+  return body ? `\n\n  ${body.trim().split(/\n/).join('\n  ')}\n` : '';
 }
 
 export function parse(commits: RawLog[], url: string) {
