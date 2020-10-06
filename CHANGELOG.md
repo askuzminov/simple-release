@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.0.8](https://github.com/askuzminov/simple-release/compare/v1.0.7...v1.0.8) (2020-10-6)
+
+### Bug Fixes
+
+- remove quote body ([615260c](https://github.com/askuzminov/simple-release/commit/615260c93f487ff122459243b5ffca6c127dc34f))
+
 ## [v1.0.7](https://github.com/askuzminov/simple-release/compare/v1.0.6...v1.0.7) (2020-10-5)
 
 ### Bug Fixes
