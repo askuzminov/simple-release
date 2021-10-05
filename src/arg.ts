@@ -11,6 +11,9 @@ export const ARG = arg<{
   'disable-github': boolean;
   'publish-github': boolean;
   'publish-npmjs': boolean;
+  '--match'?: string;
+  '--file': string[];
+  '--version'?: string;
 }>({
   help: false,
   prerelease: false,
@@ -21,19 +24,25 @@ export const ARG = arg<{
   'disable-github': false,
   'publish-github': false,
   'publish-npmjs': false,
+  '--match': undefined,
+  '--file': [],
+  '--version': undefined,
 });
 
 if (ARG.help) {
-  log('info', 'Help', 'Commands:');
-  log('info', 'Help', 'help -> get command list');
-  log('info', 'Help', 'prerelease -> only up version');
-  log('info', 'Help', 'prerelease=SOME.NEW.VERSION -> only up version with custom ID');
-  log('info', 'Help', 'enable-prerelease -> force full process');
-  log('info', 'Help', 'disable-push -> prevent git push');
-  log('info', 'Help', 'disable-git -> prevent git commit and tag');
-  log('info', 'Help', 'disable-md -> prevent write CHANGELOG.md');
-  log('info', 'Help', 'disable-github -> prevent github release');
-  log('info', 'Help', 'publish-github -> publish in github registry');
-  log('info', 'Help', 'publish-npmjs -> publish in npmjs registry');
+  log('ok', 'Commands');
+  log('info', 'help', 'Get command list');
+  log('info', 'prerelease', 'Only up version');
+  log('info', 'prerelease=SOME.NEW.VERSION', 'Only up version with custom ID');
+  log('info', 'enable-prerelease', 'Force full process');
+  log('info', 'disable-push', 'Prevent git push');
+  log('info', 'disable-git', 'Prevent git commit and tag');
+  log('info', 'disable-md', 'Prevent write CHANGELOG.md');
+  log('info', 'disable-github', 'Prevent github release');
+  log('info', 'publish-github', 'Publish in github registry');
+  log('info', 'publish-npmjs', 'Publish in npmjs registry');
+  log('info', '--match', "Match only needed tags, for example: --match 'v[0-9]*'");
+  log('info', '--file', "Filter files for include/exclude, for example: --file=src --file=types --file ':!dist'");
+  log('info', '--version', 'Custom format for version, for example: --version v{VERSION}');
   process.exit(0);
 }
