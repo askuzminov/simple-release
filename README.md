@@ -36,15 +36,104 @@ npm run release
 ## Commands
 
 - **help** -> get command list
+
+  ```bash
+  simple-release help
+  ```
+
 - **prerelease** -> only up version, not git changes and release
+
+  ```bash
+  simple-release prerelease
+  ```
+
 - **prerelease=SOME.NEW.VERSION** -> only up version with custom ID
+
+  ```bash
+  simple-release prerelease1.2.0
+  simple-release prerelease=1.2.0
+  ```
+
 - **enable-prerelease** -> force full process
+
+  ```bash
+  simple-release enable-prerelease
+  ```
+
 - **disable-push** -> prevent git push
+
+  ```bash
+  simple-release disable-push
+  ```
+
 - **disable-git** -> prevent git commit and tag
+
+  ```bash
+  simple-release disable-git
+  ```
+
 - **disable-md** -> prevent write CHANGELOG.md
+
+  ```bash
+  simple-release disable-md
+  ```
+
 - **disable-github** -> prevent github release
+
+  ```bash
+  simple-release disable-github
+  ```
+
 - **publish-github** -> publish in github registry
+
+  ```bash
+  simple-release publish-github
+  ```
+
 - **publish-npmjs** -> publish in npmjs registry
+
+  ```bash
+  simple-release publish-npmjs
+  ```
+
+- **--match** -> Match only needed tags in git history
+
+  Using [glob(7)](https://man7.org/linux/man-pages/man7/glob.7.html)
+
+  ```bash
+  simple-release --match 'v[0-9]*'
+  simple-release --match='v[0-9]*'
+  ```
+
+- **--file** -> Filter files for include/exclude
+
+  By default, all files are included except those described in `.gitignore`
+
+  Include:
+
+  - folder
+  - folder/file
+  - folder/\*.css
+
+  Exclude:
+
+  - :!folder
+  - :!folder/\*file
+  - :(exclude)folder
+  - :(exclude,icase)SUB
+
+  ```bash
+  simple-release --file src --file types --file 'folder/*.css' --file ':!dist'
+  simple-release --file=src --file=types --file='folder/*.css' --file=':!dist'
+  ```
+
+- **--version** -> Custom format for version, default `v{VERSION}`
+
+  ```bash
+  simple-release --version v{VERSION}
+  simple-release --version=v{VERSION}
+  simple-release --version @my-org/my-lib@{VERSION}
+  ```
 
 ## Lint
 

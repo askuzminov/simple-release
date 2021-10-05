@@ -8,21 +8,23 @@ process.on('unhandledRejection', error => {
 import { ARG } from './arg';
 import { getChangelog, writeChangelog } from './changelog';
 import { TITLE } from './config';
-import { addChangelog, getCommits, getTag, pushGit, writeGit } from './git';
+import { addChangelog, getCommitsRaw, getHash, getTag, parseCommits, pushGit, writeGit } from './git';
 import { log } from './log';
 import { makeMD } from './markdown';
 import { nextVersion, publish } from './npm';
 import { getPack, getVersion } from './package';
 import { parse } from './parser';
 import { githubRelese } from './release';
-import { getDate, getRepo, getURL } from './utils';
+import { formatTitle, getDate, getRepo, getURL } from './utils';
 
 const { GH_TOKEN } = process.env;
 
 async function run() {
-  const tag = await getTag();
+  const tag = await getTag(ARG['--match']);
+  const hash = await getHash();
   const date = getDate();
-  const commits = await getCommits();
+  const rawCommits = await getCommitsRaw(tag, hash, ARG['--file']);
+  const commits = await parseCommits(rawCommits);
   const pack = await getPack();
   const repo = getRepo(pack);
   const url = getURL(repo);
@@ -33,11 +35,11 @@ async function run() {
     log('warn', 'Git', 'No change found in GIT');
   } else {
     await nextVersion(config, ARG.prerelease);
-    const version = await getVersion();
+    const version = formatTitle(await getVersion(), ARG['--version']);
     const md = makeMD({ config, version, tag, date, url });
 
-    log('info', 'Version', version);
-    log('info', 'Markdown', md);
+    log('ok', 'Version', version);
+    log('ok', 'Markdown', md);
 
     if (!ARG.prerelease || ARG['enable-prerelease']) {
       if (!ARG['disable-md']) {
@@ -63,7 +65,7 @@ async function run() {
           log('warn', 'Package', 'No repository.url in package.json');
         } else {
           try {
-            log('info', 'Github', `Run release for ${repo.user}/${repo.repository}/`);
+            log('ok', 'Github', `Run release for ${repo.user}/${repo.repository}/`);
             const out = await githubRelese({
               token: GH_TOKEN,
               path: `/repos/${repo.user}/${repo.repository}/releases`,
@@ -74,7 +76,7 @@ async function run() {
                 prerelease: false,
               },
             });
-            log('info', 'Github', out);
+            log('ok', 'Github', out);
           } catch (e) {
             log('error', 'Github', e);
           }
