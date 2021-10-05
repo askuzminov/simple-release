@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.1.0](https://github.com/askuzminov/simple-release/compare/v1.0.8...v1.1.0) (2021-10-5)
+
+### Continuous Integration
+
+- fix github actions ([46650f8](https://github.com/askuzminov/simple-release/commit/46650f8d45166b5a084254a9fe926b3443481cdf))
+
+### Documentation
+
+- update ([3fbf574](https://github.com/askuzminov/simple-release/commit/3fbf5748bf5bc13f3ad2d20c712c16d463123586))
+
+### Features
+
+- Add filters ([42eeb7a](https://github.com/askuzminov/simple-release/commit/42eeb7a4e79268857798ae2c7b09b2836d2a2401))
+
+  - Filters for:
+  
+    - git tags
+    - files (include/exclude)
+  
+  - Add custom version template
+
+- add custom source links ([d96d071](https://github.com/askuzminov/simple-release/commit/d96d0719cd5104adc8047cc8653165e5a96b26fa))
+- pre version ([3d657c8](https://github.com/askuzminov/simple-release/commit/3d657c8ecd2ba0bc05401badb7d615057ab6d7af))
+
 ## [v1.0.8](https://github.com/askuzminov/simple-release/compare/v1.0.7...v1.0.8) (2020-10-6)
 
 ### Bug Fixes
