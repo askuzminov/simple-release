@@ -15,7 +15,7 @@ import { nextVersion, publish } from './npm';
 import { getPack, getVersion } from './package';
 import { parse } from './parser';
 import { githubRelese } from './release';
-import { formatTitle, getDate, getRepo, getURL } from './utils';
+import { formatTitle, getDate, getRepo, getURL, parseRepo } from './utils';
 
 const { GH_TOKEN } = process.env;
 
@@ -27,7 +27,9 @@ async function run() {
   const commits = await parseCommits(rawCommits);
   const pack = await getPack();
   const repo = getRepo(pack);
-  const url = getURL(repo);
+  const sourceRepo = parseRepo(ARG['--source-repo']) ?? repo;
+  const releaseRepo = parseRepo(ARG['--release-repo']) ?? repo;
+  const url = getURL(sourceRepo);
   const config = parse(commits, url);
   const changelog = await getChangelog(TITLE);
 
@@ -61,19 +63,19 @@ async function run() {
       if (!ARG['disable-github']) {
         if (!GH_TOKEN) {
           log('warn', 'Github', 'ENV `GH_TOKEN` not found');
-        } else if (!repo) {
+        } else if (!releaseRepo) {
           log('warn', 'Package', 'No repository.url in package.json');
         } else {
           try {
-            log('ok', 'Github', `Run release for ${repo.user}/${repo.repository}/`);
+            log('ok', 'Github', `Run release for ${releaseRepo.user}/${releaseRepo.repository}/`);
             const out = await githubRelese({
               token: GH_TOKEN,
-              path: `/repos/${repo.user}/${repo.repository}/releases`,
+              path: `/repos/${releaseRepo.user}/${releaseRepo.repository}/releases`,
               setup: {
                 tag_name: version,
                 name: version,
                 body: md,
-                prerelease: false,
+                prerelease: ARG['enable-prerelease'],
               },
             });
             log('ok', 'Github', out);

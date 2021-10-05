@@ -3,7 +3,11 @@ import { rRepo } from './config';
 import { Pack, Repo } from './types';
 
 export function getRepo(pack: Pack) {
-  const parsed = rRepo.exec((typeof pack.repository === 'object' && pack.repository?.url) || '');
+  return parseRepo(typeof pack.repository === 'object' ? pack.repository?.url : undefined);
+}
+
+export function parseRepo(url?: string) {
+  const parsed = isText(url) ? rRepo.exec(url) : null;
 
   return parsed ? { user: parsed[1], repository: parsed[2] } : undefined;
 }

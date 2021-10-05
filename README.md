@@ -135,6 +135,26 @@ npm run release
   simple-release --version @my-org/my-lib@{VERSION}
   ```
 
+- **--source-repo** -> Custom path to links for sourcecode
+
+  Default from `package.json`: `repository.url`
+
+  ```bash
+  simple-release --source-repo myorg/somepackage
+  simple-release --source-repo https://github.com/askuzminov/simple-release
+  simple-release --source-repo https://github.com/askuzminov/simple-release.git
+  ```
+
+- **--release-repo** -> Custom path to links for release notes
+
+  Default from `package.json`: `repository.url`
+
+  ```bash
+  simple-release --release-repo myorg/somepackage
+  simple-release --release-repo https://github.com/askuzminov/simple-release
+  simple-release --release-repo https://github.com/askuzminov/simple-release.git
+  ```
+
 ## Lint
 
 Check commit message on:

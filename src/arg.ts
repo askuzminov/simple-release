@@ -14,6 +14,8 @@ export const ARG = arg<{
   '--match'?: string;
   '--file': string[];
   '--version'?: string;
+  '--source-repo'?: string;
+  '--release-repo'?: string;
 }>({
   help: false,
   prerelease: false,
@@ -27,6 +29,8 @@ export const ARG = arg<{
   '--match': undefined,
   '--file': [],
   '--version': undefined,
+  '--source-repo': undefined,
+  '--release-repo': undefined,
 });
 
 if (ARG.help) {
@@ -44,5 +48,7 @@ if (ARG.help) {
   log('info', '--match', "Match only needed tags, for example: --match 'v[0-9]*'");
   log('info', '--file', "Filter files for include/exclude, for example: --file=src --file=types --file ':!dist'");
   log('info', '--version', 'Custom format for version, for example: --version v{VERSION}');
+  log('info', '--source-repo', 'Custom path to links for sourcecode: --source-repo myorg/somepackage');
+  log('info', '--release-repo', 'Custom path to links for release notes: --source-repo myorg/somepackage');
   process.exit(0);
 }
