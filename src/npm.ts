@@ -5,7 +5,7 @@ import { sp } from './utils';
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 export async function nextVersion(config: ParseConfig, preid?: string | boolean) {
-  const version = preid ? 'prerelease' : config.isMajor ? 'major' : config.isMinor ? 'minor' : 'patch';
+  const version = `${preid ? 'pre' : ''}${config.isMajor ? 'major' : config.isMinor ? 'minor' : 'patch'}`;
   log('ok', 'Version', version);
   const params = ['version', version];
 
