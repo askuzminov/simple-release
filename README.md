@@ -50,7 +50,6 @@ npm run release
 - **prerelease=SOME.NEW.VERSION** -> only up version with custom ID
 
   ```bash
-  simple-release prerelease1.2.0
   simple-release prerelease=1.2.0
   ```
 
