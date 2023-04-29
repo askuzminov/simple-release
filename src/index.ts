@@ -22,7 +22,7 @@ async function run() {
   const hash = await getHash();
   const date = getDate();
   const rawCommits = await getCommitsRaw(tag, hash, ARG['--file']);
-  const commits = await parseCommits(rawCommits);
+  const commits = parseCommits(rawCommits);
   const pack = await getPack();
   const repo = getRepo(pack);
   const sourceRepo = parseRepo(ARG['--source-repo']) ?? repo;
@@ -41,7 +41,7 @@ async function run() {
     log('ok', 'Version', version);
     log('ok', 'Markdown', md);
 
-    if (!ARG.prerelease || ARG['enable-prerelease']) {
+    if (ARG.prerelease === false || ARG['enable-prerelease']) {
       if (!ARG['disable-md']) {
         await writeChangelog(`${TITLE}${md}${changelog}`);
       }
@@ -77,4 +77,4 @@ async function run() {
   }
 }
 
-run();
+void run();

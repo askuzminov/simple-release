@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
+
 import { CHANGELOG_FILE } from './config';
 
 export async function getChangelog(title: string, path = CHANGELOG_FILE) {

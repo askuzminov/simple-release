@@ -1,4 +1,5 @@
-import { spawn, SpawnOptions } from 'child_process';
+import { SpawnOptions, spawn } from 'child_process';
+
 import { rRepo } from './config';
 import { Pack, Repo } from './types';
 
@@ -36,7 +37,11 @@ export function sp(command: string, args: string[] = [], options: SpawnOptions =
     });
 
     stream.on('exit', code => {
-      code ? reject(error) : resolve(result.trim());
+      if (code === null || code === 0) {
+        resolve(result.trim());
+      } else {
+        reject(error);
+      }
     });
   });
 }
@@ -78,6 +83,10 @@ export function arg<T extends Record<string, ArgVal>>(def: T): T {
 
 export function isText(value: unknown): value is string {
   return typeof value === 'string' && value !== '';
+}
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
 }
 
 const rVersion = /{VERSION}/g;

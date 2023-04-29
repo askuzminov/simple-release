@@ -1,9 +1,10 @@
 import { request } from 'https';
+
 import { ARG } from './arg';
 import { CI_JOB_TOKEN, CI_PROJECT_ID, CI_SERVER_HOST, GH_TOKEN } from './config';
 import { log } from './log';
 import { GithubRelease, GitlabRelease } from './types';
-import { isText } from './utils';
+import { isNumber, isText } from './utils';
 
 const isGITLAB = isText(CI_JOB_TOKEN) && !isText(GH_TOKEN);
 
@@ -13,11 +14,11 @@ export async function release(
   md: string
 ) {
   if (isGITLAB) {
-    if (!CI_JOB_TOKEN) {
+    if (!isText(CI_JOB_TOKEN)) {
       log('warn', 'Gitlab', 'ENV `CI_JOB_TOKEN` not found');
-    } else if (!CI_SERVER_HOST) {
+    } else if (!isText(CI_SERVER_HOST)) {
       log('warn', 'Gitlab', 'ENV `CI_SERVER_HOST` not found');
-    } else if (!CI_PROJECT_ID) {
+    } else if (!isText(CI_PROJECT_ID)) {
       log('warn', 'Gitlab', 'ENV `CI_PROJECT_ID` not found');
     } else if (!releaseRepo) {
       log('warn', 'Package', 'No repository.url in package.json');
@@ -29,6 +30,7 @@ export async function release(
           token: CI_JOB_TOKEN,
           projectID: CI_PROJECT_ID,
           setup: {
+            // eslint-disable-next-line camelcase
             tag_name: version,
             name: version + (ARG['enable-prerelease'] ? '-pre' : ''),
             description: md,
@@ -40,7 +42,7 @@ export async function release(
       }
     }
   } else {
-    if (!GH_TOKEN) {
+    if (!isText(GH_TOKEN)) {
       log('warn', 'Github', 'ENV `GH_TOKEN` not found');
     } else if (!releaseRepo) {
       log('warn', 'Package', 'No repository.url in package.json');
@@ -51,6 +53,7 @@ export async function release(
           token: GH_TOKEN,
           path: `/repos/${releaseRepo.user}/${releaseRepo.repository}/releases`,
           setup: {
+            // eslint-disable-next-line camelcase
             tag_name: version,
             name: version,
             body: md,
@@ -87,7 +90,7 @@ export function githubRelese({ token, path, setup }: GithubRelease) {
           data += chunk;
         });
         res.on('end', () => {
-          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 400) {
+          if (isNumber(res.statusCode) && res.statusCode >= 200 && res.statusCode < 400) {
             resolve(data);
           } else {
             reject(data);
@@ -129,7 +132,7 @@ export function gitlabRelease({ domain, token, projectID, setup }: GitlabRelease
           data += chunk;
         });
         res.on('end', () => {
-          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 400) {
+          if (isNumber(res.statusCode) && res.statusCode >= 200 && res.statusCode < 400) {
             resolve(data);
           } else {
             reject(data);

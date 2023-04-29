@@ -7,6 +7,6 @@ const colors = {
 };
 
 export function log(type: 'error' | 'warn' | 'ok' | 'info', title: string, ...message: unknown[]) {
-  // tslint:disable-next-line: no-console
+  // eslint-disable-next-line no-console
   console[type === 'ok' ? 'info' : type](`\x1b[${colors[type]}${title}:\x1b[${colors.reset}`, ...message);
 }
