@@ -1,3 +1,9 @@
+import { isText } from './utils';
+
+export const { GH_TOKEN, CI_JOB_TOKEN, CI_SERVER_HOST, CI_PROJECT_ID } = process.env;
+
+export const isGITLAB = isText(CI_JOB_TOKEN) && !isText(GH_TOKEN);
+
 export const TITLE = `# Changelog\n\nAll notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.\n`;
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';

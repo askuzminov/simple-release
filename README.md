@@ -77,7 +77,7 @@ npm run release
   simple-release disable-md
   ```
 
-- **disable-github** -> prevent github release
+- **disable-github** -> prevent github/gitlab release
 
   ```bash
   simple-release disable-github
@@ -93,6 +93,12 @@ npm run release
 
   ```bash
   simple-release publish-npmjs
+  ```
+
+- **--publish-custom** -> publish in list of customs registries
+
+  ```bash
+  simple-release --publish-custom https://your_domain_name/npm/ --publish-custom https://other_domain_name/api/npm
   ```
 
 - **--match** -> Match only needed tags in git history

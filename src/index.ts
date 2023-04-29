@@ -14,10 +14,8 @@ import { makeMD } from './markdown';
 import { nextVersion, publish } from './npm';
 import { getPack, getVersion } from './package';
 import { parse } from './parser';
-import { githubRelese } from './release';
+import { release } from './release';
 import { formatTitle, getDate, getRepo, getURL, parseRepo } from './utils';
-
-const { GH_TOKEN } = process.env;
 
 async function run() {
   const tag = await getTag(ARG['--match']);
@@ -61,28 +59,7 @@ async function run() {
       }
 
       if (!ARG['disable-github']) {
-        if (!GH_TOKEN) {
-          log('warn', 'Github', 'ENV `GH_TOKEN` not found');
-        } else if (!releaseRepo) {
-          log('warn', 'Package', 'No repository.url in package.json');
-        } else {
-          try {
-            log('ok', 'Github', `Run release for ${releaseRepo.user}/${releaseRepo.repository}/`);
-            const out = await githubRelese({
-              token: GH_TOKEN,
-              path: `/repos/${releaseRepo.user}/${releaseRepo.repository}/releases`,
-              setup: {
-                tag_name: version,
-                name: version,
-                body: md,
-                prerelease: ARG['enable-prerelease'],
-              },
-            });
-            log('ok', 'Github', out);
-          } catch (e) {
-            log('error', 'Github', e);
-          }
-        }
+        await release(releaseRepo, version, md);
       }
     }
 
@@ -92,6 +69,10 @@ async function run() {
 
     if (ARG['publish-npmjs']) {
       await publish('https://registry.npmjs.org', ARG.prerelease);
+    }
+
+    for (const customPublish of ARG['--publish-custom']) {
+      await publish(customPublish, ARG.prerelease);
     }
   }
 }
