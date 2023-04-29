@@ -1,8 +1,11 @@
 import { request } from 'https';
 import { ARG } from './arg';
-import { CI_JOB_TOKEN, CI_PROJECT_ID, CI_SERVER_HOST, GH_TOKEN, isGITLAB } from './config';
+import { CI_JOB_TOKEN, CI_PROJECT_ID, CI_SERVER_HOST, GH_TOKEN } from './config';
 import { log } from './log';
 import { GithubRelease, GitlabRelease } from './types';
+import { isText } from './utils';
+
+const isGITLAB = isText(CI_JOB_TOKEN) && !isText(GH_TOKEN);
 
 export async function release(
   releaseRepo: { user: string; repository: string } | undefined,
