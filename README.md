@@ -77,7 +77,7 @@ npm run release
   simple-release disable-md
   ```
 
-- **disable-github** -> prevent github/gitlab release
+- **disable-github** -> prevent github release
 
   ```bash
   simple-release disable-github
@@ -87,6 +87,12 @@ npm run release
 
   ```bash
   simple-release publish-github
+  ```
+
+- **publish-npmjs** -> publish in npmjs registry
+
+  ```bash
+  simple-release publish-npmjs
   ```
 
 - **--publish-custom** -> publish in list of customs registries
