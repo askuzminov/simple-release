@@ -285,3 +285,67 @@ git config --local user.name "CI"
 mkdir -p ~/.ssh
 ssh-keyscan github.com > ~/.ssh/known_hosts
 ```
+
+### Setup custom gitlab example
+
+Add in .gitignore
+
+```md
+.npmrc
+```
+
+Setup package.json
+
+```json
+  "scripts": {
+    "release": "simple-release"
+  },
+```
+
+Setup .gitlab-ci.yml
+
+```yml
+image: node:18
+
+stages:
+  - publish
+
+deploy:
+  stage: publish
+  only:
+    - branches
+  variables:
+    # Setup group or project access token with role "Maintainer"
+    # https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html
+    CI_JOB_TOKEN: $CI_TOKEN
+    # Setup strategy for clean history
+    GIT_STRATEGY: clone
+    # Setup depth for full history
+    GIT_DEPTH: 0
+  script:
+    - |
+      # Setup GIT
+      git config --local user.email "ci@communico.pro"
+      git config --local user.name "ci"
+      # Allow ci to push branch
+      git remote set-url origin "https://ci:$CI_JOB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.git"
+      # Avoid problem with detached branch
+      git checkout "$CI_COMMIT_REF_NAME"
+    - |
+      # Setup .npmrc
+      echo "//$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/packages/npm/:_authToken=$CI_JOB_TOKEN" > .npmrc
+      echo "@$CI_PROJECT_NAMESPACE:registry=https://$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/packages/npm/" >> .npmrc
+    - |
+      # Prepare your package
+      npm ci
+      npm run lint
+      npm test
+    - |
+      if [[ $CI_COMMIT_REF_NAME == 'master' ]]; then
+        echo "Release production"
+        npm run release -- --publish-custom "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
+      else
+        echo "Release canary"
+        npm run release -- --publish-custom "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" prerelease=$CI_COMMIT_REF_SLUG.$CI_JOB_ID
+      fi
+```

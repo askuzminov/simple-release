@@ -1,6 +1,14 @@
 import { SpawnOptions, spawn } from 'child_process';
 
-import { rRepo } from './config';
+import {
+  CI_PROJECT_NAME,
+  CI_PROJECT_NAMESPACE,
+  CI_SERVER_URL,
+  GITHUB_REPOSITORY,
+  GITHUB_SERVER_URL,
+  isGITLAB,
+  rRepo,
+} from './config';
 import { Pack, Repo } from './types';
 
 export function getRepo(pack: Pack) {
@@ -14,7 +22,13 @@ export function parseRepo(url?: string) {
 }
 
 export function getURL(repo: Repo): string {
-  return repo ? `https://github.com/${repo.user}/${repo.repository}` : '';
+  return isGITLAB
+    ? repo
+      ? `${CI_SERVER_URL}/${repo.user}/${repo.repository}/-`
+      : `${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/-`
+    : repo
+    ? `${GITHUB_SERVER_URL}/${repo.user}/${repo.repository}`
+    : `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}`;
 }
 
 export function getDate() {

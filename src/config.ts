@@ -1,4 +1,17 @@
-export const { GH_TOKEN, CI_JOB_TOKEN, CI_SERVER_HOST, CI_PROJECT_ID } = process.env;
+export const {
+  CI_JOB_ID,
+  GH_TOKEN,
+  CI_JOB_TOKEN,
+  CI_SERVER_HOST,
+  CI_PROJECT_ID,
+  CI_SERVER_URL = '',
+  CI_PROJECT_NAMESPACE = '',
+  CI_PROJECT_NAME = '',
+  GITHUB_SERVER_URL = 'https://github.com',
+  GITHUB_REPOSITORY = '',
+} = process.env;
+
+export const isGITLAB = typeof CI_JOB_ID === 'string' && CI_JOB_ID !== '';
 
 export const TITLE =
   // eslint-disable-next-line max-len
