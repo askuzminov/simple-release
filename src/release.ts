@@ -1,10 +1,8 @@
-import { request } from 'https';
-
 import { ARG } from './arg';
 import { CI_JOB_TOKEN, CI_PROJECT_ID, CI_SERVER_HOST, GH_TOKEN, isGITLAB } from './config';
 import { log } from './log';
 import { GithubRelease, GitlabRelease } from './types';
-import { isNumber, isText } from './utils';
+import { http, isText } from './utils';
 
 export async function release(
   releaseRepo: { user: string; repository: string } | undefined,
@@ -47,7 +45,7 @@ export async function release(
     } else {
       try {
         log('ok', 'Github', `Run release for ${releaseRepo.user}/${releaseRepo.repository}/`);
-        const out = await githubRelese({
+        const out = await githubRelease({
           token: GH_TOKEN,
           path: `/repos/${releaseRepo.user}/${releaseRepo.repository}/releases`,
           setup: {
@@ -66,85 +64,37 @@ export async function release(
   }
 }
 
-export function githubRelese({ token, path, setup }: GithubRelease) {
-  return new Promise((resolve, reject) => {
-    const req = request(
-      {
-        host: 'api.github.com',
-        port: 443,
-        path,
-        method: 'POST',
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/json',
-          'user-agent': 'Github-Releaser',
-        },
+export function githubRelease({ token, path, setup }: GithubRelease) {
+  return http(
+    {
+      host: 'api.github.com',
+      port: 443,
+      path,
+      method: 'POST',
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/json',
+        'user-agent': 'Github-Releaser',
       },
-      res => {
-        res.setEncoding('utf8');
-
-        let data = '';
-        res.on('data', chunk => {
-          data += chunk;
-        });
-        res.on('end', () => {
-          if (isNumber(res.statusCode) && res.statusCode >= 200 && res.statusCode < 400) {
-            resolve(data);
-          } else {
-            reject(data);
-          }
-        });
-      }
-    );
-
-    req.on('error', e => {
-      reject(e.message);
-    });
-
-    req.write(JSON.stringify(setup));
-
-    req.end();
-  });
+    },
+    setup
+  );
 }
 
 export function gitlabRelease({ domain, token, projectID, setup }: GitlabRelease) {
-  return new Promise((resolve, reject) => {
-    const req = request(
-      {
-        host: domain,
-        port: 443,
-        path: `/api/v4/projects/${projectID}/releases`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'PRIVATE-TOKEN': token,
-          Accept: 'application/json',
-          'user-agent': 'Github-Releaser',
-        },
+  return http(
+    {
+      host: domain,
+      port: 443,
+      path: `/api/v4/projects/${projectID}/releases`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'PRIVATE-TOKEN': token,
+        Accept: 'application/json',
+        'user-agent': 'Gitlab-Releaser',
       },
-      res => {
-        res.setEncoding('utf8');
-
-        let data = '';
-        res.on('data', chunk => {
-          data += chunk;
-        });
-        res.on('end', () => {
-          if (isNumber(res.statusCode) && res.statusCode >= 200 && res.statusCode < 400) {
-            resolve(data);
-          } else {
-            reject(data);
-          }
-        });
-      }
-    );
-
-    req.on('error', e => {
-      reject(e.message);
-    });
-
-    req.write(JSON.stringify(setup));
-
-    req.end();
-  });
+    },
+    setup
+  );
 }

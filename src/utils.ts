@@ -1,4 +1,5 @@
 import { SpawnOptions, spawn } from 'child_process';
+import { RequestOptions, request } from 'https';
 
 import {
   CI_PROJECT_NAME,
@@ -107,4 +108,32 @@ const rVersion = /{VERSION}/g;
 
 export function formatTitle(version: string, title?: string): string {
   return isText(title) ? title.replace(rVersion, version) : `v${version}`;
+}
+
+export function http(options: RequestOptions, body: object) {
+  return new Promise((resolve, reject) => {
+    const req = request(options, res => {
+      res.setEncoding('utf8');
+
+      let data = '';
+      res.on('data', chunk => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        if (isNumber(res.statusCode) && res.statusCode >= 200 && res.statusCode < 400) {
+          resolve(data);
+        } else {
+          reject(data);
+        }
+      });
+    });
+
+    req.on('error', e => {
+      reject(e.message);
+    });
+
+    req.write(JSON.stringify(body));
+
+    req.end();
+  });
 }
