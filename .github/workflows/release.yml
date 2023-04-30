@@ -45,9 +45,7 @@ jobs:
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
           echo '//npm.pkg.github.com/:_authToken=${GH_TOKEN}' >> ~/.npmrc
       - name: Install dependencies
-        run: |
-          npm pkg delete scripts.prepare
-          npm ci
+        run: npm ci
       - name: Check
         run: |
           npm run check-types
