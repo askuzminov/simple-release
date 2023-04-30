@@ -48,7 +48,7 @@
     "lint:prettier": "prettier --write \"@(src)/**/*.{ts,tsx,js,json,css,md,html,yml}\"",
     "lint": "eslint --cache --cache-location \".cache/eslint\" '**/*.{js,ts,tsx}'",
     "lint:fix": "npm run lint -- --fix",
-    "release": "node ./dist/cjs/index.js",
+    "release": "node ./dist/cjs/index.js --file src --file package.json",
     "lint-staged": "lint-staged",
     "dev:no-git": "ts-node -T src disable-git disable-github",
     "dev:no-push": "ts-node -T src disable-push disable-github",
