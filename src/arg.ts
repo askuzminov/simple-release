@@ -11,7 +11,7 @@ export const ARG = arg<{
   'disable-github': boolean;
   'publish-github': boolean;
   'publish-npmjs': boolean;
-  '--mode': 'publish' | 'next-version' | 'has-changes';
+  '--mode': 'publish' | 'current-version' | 'next-version' | 'has-changes';
   '--publish-custom': string[];
   '--match'?: string;
   '--file': string[];
@@ -52,7 +52,11 @@ if (ARG.help) {
   log(
     'info',
     '--mode',
-    'Mode: publish (default), next-version (return next version), has-changes (return true | false)'
+    `Mode: 
+- publish (default);
+- current-version (return current version);
+- next-version (return next version);
+- has-changes (return true | false).`
   );
   log('info', '--publish-custom', 'Publish in any custom registry');
   log('info', '--match', "Match only needed tags, for example: --match 'v[0-9]*'");

@@ -42,6 +42,12 @@ async function run() {
     return;
   }
 
+  if (ARG['--mode'] === 'current-version') {
+    const current = await getVersion();
+    process.stdout.write(current);
+    return;
+  }
+
   if (config.isEmpty) {
     log('warn', 'Git', 'No change found in GIT');
   } else {

@@ -95,10 +95,16 @@ npm run release
   simple-release --publish-custom https://your_domain_name/npm/ --publish-custom https://other_domain_name/api/npm
   ```
 
-- **--mode** -> Mode: publish (default), next-version (return next version)
+- **--mode** -> Mode:
+
+  - publish (default);
+  - current-version (return current version);
+  - next-version (return next version);
+  - has-changes (return true | false).
 
   ```bash
   simple-release --mode publish # Default
+  simple-release --mode current-version # Return current npm version
   simple-release --mode next-version # Return next npm version
   simple-release --mode has-changes # Return true | false
   ```
