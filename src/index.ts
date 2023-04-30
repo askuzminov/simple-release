@@ -11,27 +11,41 @@ import { TITLE } from './config';
 import { addChangelog, getCommitsRaw, getHash, getTag, parseCommits, pushGit, writeGit } from './git';
 import { log } from './log';
 import { makeMD } from './markdown';
-import { nextVersion, publish } from './npm';
+import { getNextVersion, nextVersion, publish } from './npm';
 import { getPack, getVersion } from './package';
 import { parse } from './parser';
-import { githubRelese } from './release';
+import { release } from './release';
 import { formatTitle, getDate, getRepo, getURL, parseRepo } from './utils';
 
-const { GH_TOKEN } = process.env;
-
 async function run() {
+  if (ARG['--mode'] === 'current-version') {
+    const current = await getVersion();
+    process.stdout.write(current);
+    return;
+  }
+
   const tag = await getTag(ARG['--match']);
   const hash = await getHash();
   const date = getDate();
   const rawCommits = await getCommitsRaw(tag, hash, ARG['--file']);
-  const commits = await parseCommits(rawCommits);
+  const commits = parseCommits(rawCommits);
   const pack = await getPack();
   const repo = getRepo(pack);
   const sourceRepo = parseRepo(ARG['--source-repo']) ?? repo;
   const releaseRepo = parseRepo(ARG['--release-repo']) ?? repo;
   const url = getURL(sourceRepo);
   const config = parse(commits, url);
-  const changelog = await getChangelog(TITLE);
+
+  if (ARG['--mode'] === 'has-changes') {
+    process.stdout.write(config.isEmpty ? 'false' : 'true');
+    return;
+  }
+
+  if (ARG['--mode'] === 'next-version') {
+    const next = await getNextVersion(config, ARG.prerelease);
+    process.stdout.write(next);
+    return;
+  }
 
   if (config.isEmpty) {
     log('warn', 'Git', 'No change found in GIT');
@@ -43,8 +57,9 @@ async function run() {
     log('ok', 'Version', version);
     log('ok', 'Markdown', md);
 
-    if (!ARG.prerelease || ARG['enable-prerelease']) {
+    if (ARG.prerelease === false || ARG['enable-prerelease']) {
       if (!ARG['disable-md']) {
+        const changelog = await getChangelog(TITLE);
         await writeChangelog(`${TITLE}${md}${changelog}`);
       }
 
@@ -61,28 +76,7 @@ async function run() {
       }
 
       if (!ARG['disable-github']) {
-        if (!GH_TOKEN) {
-          log('warn', 'Github', 'ENV `GH_TOKEN` not found');
-        } else if (!releaseRepo) {
-          log('warn', 'Package', 'No repository.url in package.json');
-        } else {
-          try {
-            log('ok', 'Github', `Run release for ${releaseRepo.user}/${releaseRepo.repository}/`);
-            const out = await githubRelese({
-              token: GH_TOKEN,
-              path: `/repos/${releaseRepo.user}/${releaseRepo.repository}/releases`,
-              setup: {
-                tag_name: version,
-                name: version,
-                body: md,
-                prerelease: ARG['enable-prerelease'],
-              },
-            });
-            log('ok', 'Github', out);
-          } catch (e) {
-            log('error', 'Github', e);
-          }
-        }
+        await release(releaseRepo, version, md);
       }
     }
 
@@ -93,7 +87,11 @@ async function run() {
     if (ARG['publish-npmjs']) {
       await publish('https://registry.npmjs.org', ARG.prerelease);
     }
+
+    for (const customPublish of ARG['--publish-custom']) {
+      await publish(customPublish, ARG.prerelease);
+    }
   }
 }
 
-run();
+void run();

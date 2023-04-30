@@ -1,5 +1,15 @@
-import { spawn, SpawnOptions } from 'child_process';
-import { rRepo } from './config';
+import { SpawnOptions, spawn } from 'child_process';
+import { RequestOptions, request } from 'https';
+
+import {
+  CI_PROJECT_NAME,
+  CI_PROJECT_NAMESPACE,
+  CI_SERVER_URL,
+  GITHUB_REPOSITORY,
+  GITHUB_SERVER_URL,
+  isGITLAB,
+  rRepo,
+} from './config';
 import { Pack, Repo } from './types';
 
 export function getRepo(pack: Pack) {
@@ -13,7 +23,13 @@ export function parseRepo(url?: string) {
 }
 
 export function getURL(repo: Repo): string {
-  return repo ? `https://github.com/${repo.user}/${repo.repository}` : '';
+  return isGITLAB
+    ? repo
+      ? `${CI_SERVER_URL}/${repo.user}/${repo.repository}/-`
+      : `${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/-`
+    : repo
+    ? `${GITHUB_SERVER_URL}/${repo.user}/${repo.repository}`
+    : `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}`;
 }
 
 export function getDate() {
@@ -36,7 +52,11 @@ export function sp(command: string, args: string[] = [], options: SpawnOptions =
     });
 
     stream.on('exit', code => {
-      code ? reject(error) : resolve(result.trim());
+      if (code === null || code === 0) {
+        resolve(result.trim());
+      } else {
+        reject(error);
+      }
     });
   });
 }
@@ -80,8 +100,40 @@ export function isText(value: unknown): value is string {
   return typeof value === 'string' && value !== '';
 }
 
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
+}
+
 const rVersion = /{VERSION}/g;
 
 export function formatTitle(version: string, title?: string): string {
   return isText(title) ? title.replace(rVersion, version) : `v${version}`;
+}
+
+export function http(options: RequestOptions, body: object) {
+  return new Promise((resolve, reject) => {
+    const req = request(options, res => {
+      res.setEncoding('utf8');
+
+      let data = '';
+      res.on('data', chunk => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        if (isNumber(res.statusCode) && res.statusCode >= 200 && res.statusCode < 400) {
+          resolve(data);
+        } else {
+          reject(data);
+        }
+      });
+    });
+
+    req.on('error', e => {
+      reject(e.message);
+    });
+
+    req.write(JSON.stringify(body));
+
+    req.end();
+  });
 }

@@ -95,6 +95,26 @@ npm run release
   simple-release publish-npmjs
   ```
 
+- **--publish-custom** -> publish in list of customs registries
+
+  ```bash
+  simple-release --publish-custom https://your_domain_name/npm/ --publish-custom https://other_domain_name/api/npm
+  ```
+
+- **--mode** -> Mode:
+
+  - publish (default);
+  - current-version (return current version);
+  - next-version (return next version);
+  - has-changes (return true | false).
+
+  ```bash
+  simple-release --mode publish # Default
+  simple-release --mode current-version # Return current npm version
+  simple-release --mode next-version # Return next npm version
+  simple-release --mode has-changes # Return true | false
+  ```
+
 - **--match** -> Match only needed tags in git history
 
   Using [glob(7)](https://man7.org/linux/man-pages/man7/glob.7.html)
@@ -241,6 +261,14 @@ And when enable publish, used standard scripts for <https://docs.npmjs.com/cli/p
 
 See full list of scripts in <https://docs.npmjs.com/misc/scripts#description>.
 
+## Init v1.0.0
+
+Setup package.json
+
+```json
+"version": "1.0.0-0",
+```
+
 ## Example CI
 
 ```bash
@@ -264,7 +292,7 @@ Use fetch-depth for full
 
 ```yml
 - name: Checkout
-  uses: actions/checkout@v2
+  uses: actions/checkout@v3
   with: { fetch-depth: 0 }
 ```
 
@@ -278,4 +306,68 @@ git config --local user.email "bot@ci.com"
 git config --local user.name "CI"
 mkdir -p ~/.ssh
 ssh-keyscan github.com > ~/.ssh/known_hosts
+```
+
+### Setup custom gitlab example
+
+Add in .gitignore
+
+```md
+.npmrc
+```
+
+Setup package.json
+
+```json
+  "scripts": {
+    "release": "simple-release"
+  },
+```
+
+Setup .gitlab-ci.yml
+
+```yml
+image: node:18
+
+stages:
+  - publish
+
+deploy:
+  stage: publish
+  only:
+    - branches
+  variables:
+    # Setup group or project access token with role "Maintainer"
+    # https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html
+    CI_JOB_TOKEN: $CI_TOKEN
+    # Setup strategy for clean history
+    GIT_STRATEGY: clone
+    # Setup depth for full history
+    GIT_DEPTH: 0
+  script:
+    - |
+      # Setup GIT
+      git config --local user.email "ci@example.com"
+      git config --local user.name "ci"
+      # Allow ci to push branch
+      git remote set-url origin "https://ci:$CI_JOB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.git"
+      # Avoid problem with detached branch
+      git checkout "$CI_COMMIT_REF_NAME"
+    - |
+      # Setup .npmrc
+      echo "//$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/packages/npm/:_authToken=$CI_JOB_TOKEN" > .npmrc
+      echo "@$CI_PROJECT_NAMESPACE:registry=https://$CI_SERVER_HOST/api/v4/projects/$CI_PROJECT_ID/packages/npm/" >> .npmrc
+    - |
+      # Prepare your package
+      npm ci
+      npm run lint
+      npm test
+    - |
+      if [[ $CI_COMMIT_REF_NAME == 'master' ]]; then
+        echo "Release production"
+        npm run release -- --publish-custom "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
+      else
+        echo "Release canary"
+        npm run release -- --publish-custom "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" prerelease=$CI_COMMIT_REF_SLUG.$CI_JOB_ID
+      fi
 ```

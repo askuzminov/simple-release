@@ -11,6 +11,8 @@ export const ARG = arg<{
   'disable-github': boolean;
   'publish-github': boolean;
   'publish-npmjs': boolean;
+  '--mode': 'publish' | 'current-version' | 'next-version' | 'has-changes';
+  '--publish-custom': string[];
   '--match'?: string;
   '--file': string[];
   '--version'?: string;
@@ -26,6 +28,8 @@ export const ARG = arg<{
   'disable-github': false,
   'publish-github': false,
   'publish-npmjs': false,
+  '--mode': 'publish',
+  '--publish-custom': [],
   '--match': undefined,
   '--file': [],
   '--version': undefined,
@@ -45,6 +49,16 @@ if (ARG.help) {
   log('info', 'disable-github', 'Prevent github release');
   log('info', 'publish-github', 'Publish in github registry');
   log('info', 'publish-npmjs', 'Publish in npmjs registry');
+  log(
+    'info',
+    '--mode',
+    `Mode: 
+- publish (default);
+- current-version (return current version);
+- next-version (return next version);
+- has-changes (return true | false).`
+  );
+  log('info', '--publish-custom', 'Publish in any custom registry');
   log('info', '--match', "Match only needed tags, for example: --match 'v[0-9]*'");
   log('info', '--file', "Filter files for include/exclude, for example: --file=src --file=types --file ':!dist'");
   log('info', '--version', 'Custom format for version, for example: --version v{VERSION}');

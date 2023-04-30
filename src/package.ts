@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
+
 import { Pack } from './types';
 import { isText } from './utils';
 

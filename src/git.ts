@@ -30,6 +30,7 @@ export const getCommitsRaw = (from: string, to: string, files?: string[]) =>
   sp('git', [
     'log',
     `${from}..${to}`,
+    // eslint-disable-next-line max-len
     `--pretty=format:{ "short": ${ESCAPE}%h${ESCAPE}, "hash": ${ESCAPE}%H${ESCAPE}, "title": ${ESCAPE}%s${ESCAPE}, "body": ${ESCAPE}%b${ESCAPE} }${DELIM}`,
     ...(files ? ['--'].concat(files) : []),
   ]);
@@ -45,15 +46,14 @@ const esc = (str: string) =>
 
 const parse = (str: string) => {
   try {
-    return JSON.parse(str);
+    return JSON.parse(str) as unknown;
   } catch (e) {
     log('error', 'Parse commits', str);
     throw e;
   }
 };
 
-export const parseCommits = async (str: string) =>
-  str.split(DELIM).map(esc).filter(Boolean).map(parse).reverse() as RawLog[];
+export const parseCommits = (str: string) => str.split(DELIM).map(esc).filter(Boolean).map(parse).reverse() as RawLog[];
 
 export const addChangelog = async () => {
   log('ok', 'Git', `Add ${CHANGELOG_FILE}`);
@@ -61,12 +61,12 @@ export const addChangelog = async () => {
 };
 
 export const writeGit = async (version: string) => {
-  log('ok', 'Git', `Add package-lock.json`);
+  log('ok', 'Git', 'Add package-lock.json');
   await sp('git', ['add', 'package-lock.json'], { stdio: 'inherit' }).catch(() => {
-    log('warn', 'Git', `File "package-lock.json" not found.`);
+    log('warn', 'Git', 'File "package-lock.json" not found.');
   });
 
-  log('ok', 'Git', `Add package.json`);
+  log('ok', 'Git', 'Add package.json');
   await sp('git', ['add', 'package.json'], { stdio: 'inherit' });
 
   log('ok', 'Git', `Commit version ${version}`);
@@ -77,7 +77,7 @@ export const writeGit = async (version: string) => {
 };
 
 export const pushGit = async () => {
-  log('ok', 'Git', `Push tags`);
+  log('ok', 'Git', 'Push tags');
   await sp('git', ['push'], { stdio: 'inherit' });
   await sp('git', ['push', '--tags'], { stdio: 'inherit' });
 };

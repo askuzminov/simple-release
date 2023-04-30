@@ -3,19 +3,30 @@ import { getRepo } from './utils';
 
 export type Pack = Record<string, string | undefined | Record<string, string | undefined>>;
 
-export interface Release {
+export interface GithubReleaseData {
   tag_name: string;
-  target_commitish?: string;
   name?: string;
   body?: string;
-  draft?: boolean;
   prerelease?: boolean;
 }
 
 export interface GithubRelease {
   token: string;
   path: string;
-  setup: Release;
+  setup: GithubReleaseData;
+}
+
+export interface GitlabReleaseData {
+  name?: string;
+  tag_name: string;
+  description?: string;
+}
+
+export interface GitlabRelease {
+  domain: string;
+  token: string;
+  projectID: string;
+  setup: GitlabReleaseData;
 }
 
 export interface RawLog {
