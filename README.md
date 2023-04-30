@@ -100,6 +100,7 @@ npm run release
   ```bash
   simple-release --mode publish # Default
   simple-release --mode next-version # Return next npm version
+  simple-release --mode has-changes # Return true | false
   ```
 
 - **--match** -> Match only needed tags in git history

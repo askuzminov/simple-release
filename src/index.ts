@@ -31,6 +31,11 @@ async function run() {
   const config = parse(commits, url);
   const changelog = await getChangelog(TITLE);
 
+  if (ARG['--mode'] === 'has-changes') {
+    process.stdout.write(config.isEmpty ? 'false' : 'true');
+    return;
+  }
+
   if (ARG['--mode'] === 'next-version') {
     const next = await getNextVersion(config, ARG.prerelease);
     process.stdout.write(next);
