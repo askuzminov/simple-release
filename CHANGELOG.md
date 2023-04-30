@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.2.0](https://github.com/askuzminov/simple-release/compare/v1.1.0...v1.2.0) (2023-4-30)
+
+### Features
+
+- gitlab (#2) ([43cbd60](https://github.com/askuzminov/simple-release/commit/43cbd602cd33e05fd7342810a4200baf6b5940fa))
+
+  * feat: gitlab
+  
+  * fix: push
+  
+  * ci: fix
+  
+  * fix: up
+  
+  * fix: up
+  
+  * build: eslint
+  
+  * fix: gitlab md
+  
+  * ci: fix
+  
+  * ci: fix
+  
+  * ci: fix
+  
+  * ci: fix
+  
+  * feat: changes
+  
+  * feat: current version
+  
+  * fix: optimize
+  
+  * docs: fix
+  
+  * docs: fix
+  
+  * fix: up
+  
+  * fix: up
+  
+  * fix: refactor
+
+
 ## [v1.1.0](https://github.com/askuzminov/simple-release/compare/v1.0.8...v1.1.0) (2021-10-5)
 
 ### Continuous Integration
