@@ -11,8 +11,6 @@ const { GIT_PARAMS, HUSKY_GIT_PARAMS } = process.env;
 
 const commit = readFileSync(join(process.cwd(), GIT_PARAMS ?? HUSKY_GIT_PARAMS ?? '.git/COMMIT_EDITMSG'), 'utf8');
 
-console.log(GIT_PARAMS, HUSKY_GIT_PARAMS, commit);
-
 const parsed = rParse.exec(commit);
 const example = `
 - <type>: <description>
