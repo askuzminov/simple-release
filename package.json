@@ -52,6 +52,7 @@
     "lint-staged": "lint-staged",
     "dev:no-git": "ts-node -T src disable-git disable-github --file src --file package.json",
     "dev:no-push": "ts-node -T src disable-push disable-github --file src --file package.json",
+    "dev:next-version": "ts-node -T src --mode next-version --file src --file package.json prerelease=next > test.log",
     "prepare": "if test \"$CI\" != \"true\" ; then husky install ; fi"
   },
   "devDependencies": {

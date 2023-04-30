@@ -11,7 +11,7 @@ import { TITLE } from './config';
 import { addChangelog, getCommitsRaw, getHash, getTag, parseCommits, pushGit, writeGit } from './git';
 import { log } from './log';
 import { makeMD } from './markdown';
-import { nextVersion, publish } from './npm';
+import { getNextVersion, nextVersion, publish } from './npm';
 import { getPack, getVersion } from './package';
 import { parse } from './parser';
 import { release } from './release';
@@ -30,6 +30,12 @@ async function run() {
   const url = getURL(sourceRepo);
   const config = parse(commits, url);
   const changelog = await getChangelog(TITLE);
+
+  if (ARG['--mode'] === 'next-version') {
+    const next = await getNextVersion(config, ARG.prerelease);
+    process.stdout.write(next);
+    return;
+  }
 
   if (config.isEmpty) {
     log('warn', 'Git', 'No change found in GIT');

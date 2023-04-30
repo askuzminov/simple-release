@@ -89,16 +89,17 @@ npm run release
   simple-release publish-github
   ```
 
-- **publish-npmjs** -> publish in npmjs registry
-
-  ```bash
-  simple-release publish-npmjs
-  ```
-
 - **--publish-custom** -> publish in list of customs registries
 
   ```bash
   simple-release --publish-custom https://your_domain_name/npm/ --publish-custom https://other_domain_name/api/npm
+  ```
+
+- **--mode** -> Mode: publish (default), next-version (return next version)
+
+  ```bash
+  simple-release --mode publish # Default
+  simple-release --mode next-version # Return next npm version
   ```
 
 - **--match** -> Match only needed tags in git history
@@ -246,6 +247,14 @@ Used standard scripts for <https://docs.npmjs.com/cli/version>.
 And when enable publish, used standard scripts for <https://docs.npmjs.com/cli/publish>.
 
 See full list of scripts in <https://docs.npmjs.com/misc/scripts#description>.
+
+## Init v1.0.0
+
+Setup package.json
+
+```json
+"version": "1.0.0-0",
+```
 
 ## Example CI
 
