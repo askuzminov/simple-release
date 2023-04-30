@@ -286,7 +286,7 @@ Use fetch-depth for full
 
 ```yml
 - name: Checkout
-  uses: actions/checkout@v2
+  uses: actions/checkout@v3
   with: { fetch-depth: 0 }
 ```
 
@@ -341,7 +341,7 @@ deploy:
   script:
     - |
       # Setup GIT
-      git config --local user.email "ci@communico.pro"
+      git config --local user.email "ci@example.com"
       git config --local user.name "ci"
       # Allow ci to push branch
       git remote set-url origin "https://ci:$CI_JOB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME.git"
