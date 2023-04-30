@@ -8,9 +8,7 @@ import { isText, sp } from './utils';
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 export async function nextVersion(config: ParseConfig, preid?: string | boolean) {
-  const version = `${isText(preid) || preid === true ? 'pre' : ''}${
-    config.isMajor ? 'major' : config.isMinor ? 'minor' : 'patch'
-  }`;
+  const version = getVersionType(config, preid);
   log('ok', 'Version', version);
   const params = ['version', version];
 
@@ -26,11 +24,15 @@ export async function nextVersion(config: ParseConfig, preid?: string | boolean)
 
 export async function getNextVersion(config: ParseConfig, preid?: string | boolean): Promise<string> {
   const current = await getVersion();
-  const version = `${isText(preid) || preid === true ? 'pre' : ''}${
-    config.isMajor ? 'major' : config.isMinor ? 'minor' : 'patch'
-  }` as const;
+  const version = getVersionType(config, preid);
 
   return inc(current, version, isText(preid) ? preid : preid === true ? 'pre' : undefined) ?? current;
+}
+
+export function getVersionType(config: ParseConfig, preid?: string | boolean) {
+  return `${isText(preid) || preid === true ? 'pre' : ''}${
+    config.isMajor ? 'major' : config.isMinor ? 'minor' : 'patch'
+  }` as const;
 }
 
 export async function publish(registry: string, preid?: string | boolean) {
