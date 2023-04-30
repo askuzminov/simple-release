@@ -18,6 +18,12 @@ import { release } from './release';
 import { formatTitle, getDate, getRepo, getURL, parseRepo } from './utils';
 
 async function run() {
+  if (ARG['--mode'] === 'current-version') {
+    const current = await getVersion();
+    process.stdout.write(current);
+    return;
+  }
+
   const tag = await getTag(ARG['--match']);
   const hash = await getHash();
   const date = getDate();
@@ -29,7 +35,6 @@ async function run() {
   const releaseRepo = parseRepo(ARG['--release-repo']) ?? repo;
   const url = getURL(sourceRepo);
   const config = parse(commits, url);
-  const changelog = await getChangelog(TITLE);
 
   if (ARG['--mode'] === 'has-changes') {
     process.stdout.write(config.isEmpty ? 'false' : 'true');
@@ -39,12 +44,6 @@ async function run() {
   if (ARG['--mode'] === 'next-version') {
     const next = await getNextVersion(config, ARG.prerelease);
     process.stdout.write(next);
-    return;
-  }
-
-  if (ARG['--mode'] === 'current-version') {
-    const current = await getVersion();
-    process.stdout.write(current);
     return;
   }
 
@@ -60,6 +59,7 @@ async function run() {
 
     if (ARG.prerelease === false || ARG['enable-prerelease']) {
       if (!ARG['disable-md']) {
+        const changelog = await getChangelog(TITLE);
         await writeChangelog(`${TITLE}${md}${changelog}`);
       }
 
