@@ -1,7 +1,29 @@
 {
   "name": "@askuzminov/simple-release",
   "version": "1.2.0",
-  "description": "",
+  "description": "Zero-dependency auto release pipeline for npm packages — conventional commits, monorepo/workspace, changelog, multi-registry publish",
+  "keywords": [
+    "release",
+    "version",
+    "publish",
+    "conventional-commits",
+    "changelog",
+    "semver",
+    "monorepo",
+    "workspace",
+    "lerna",
+    "changesets",
+    "semantic-release",
+    "npm",
+    "bun",
+    "pnpm",
+    "yarn",
+    "github",
+    "gitlab",
+    "ci",
+    "automation",
+    "zero-dependencies"
+  ],
   "author": {
     "name": "Kuzminov Alexander",
     "url": "https://github.com/askuzminov"
@@ -36,46 +58,45 @@
     "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=10.12"
   },
   "scripts": {
-    "check-types": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check-types": "tsc --noEmit && tsc -p tsconfig.build.json --noEmit",
     "check-types:watch": "npm run check-types -- --watch",
-    "build:cjs": "tsc",
-    "build:esm": "tsc --module es2015 --outDir ./dist/esm/",
-    "build:types": "tsc --outDir ./dist/types/ --declaration --emitDeclarationOnly",
+    "build:cjs": "tsc -p tsconfig.build.json",
+    "build:esm": "tsc -p tsconfig.build.json --module es2015 --outDir ./dist/esm/",
+    "build:types": "tsc -p tsconfig.build.json --outDir ./dist/types/ --declaration --emitDeclarationOnly",
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
     "lint:prettier": "prettier --write \"@(src)/**/*.{ts,tsx,js,json,css,md,html,yml}\"",
-    "lint": "eslint --cache --cache-location \".cache/eslint\" '**/*.{js,ts,tsx}'",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "release": "node ./dist/cjs/index.js --file src --file package.json",
     "lint-staged": "lint-staged",
-    "dev:no-git": "ts-node -T src disable-git disable-github --file src --file package.json",
-    "dev:no-push": "ts-node -T src disable-push disable-github --file src --file package.json",
-    "dev:current-version": "ts-node -T src --mode current-version --file src prerelease=next",
-    "dev:next-version": "ts-node -T src --mode next-version --file src prerelease=next",
-    "dev:has-changes": "ts-node -T src --mode has-changes --file src  prerelease=next",
+    "dev:no-git": "node --import tsx src disable-git disable-github --file src --file package.json",
+    "dev:no-push": "node --import tsx src disable-push disable-github --file src --file package.json",
+    "dev:current-version": "node --import tsx src --mode current-version --file src prerelease=next",
+    "dev:next-version": "node --import tsx src --mode next-version --file src prerelease=next",
+    "dev:has-changes": "node --import tsx src --mode has-changes --file src prerelease=next",
     "prepare": "if test \"$CI\" != \"true\" ; then husky install ; fi"
   },
   "devDependencies": {
-    "@types/node": "^18.16.3",
-    "@typescript-eslint/eslint-plugin": "^5.59.1",
-    "@typescript-eslint/parser": "^5.59.1",
-    "eslint": "^8.39.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unicorn": "^46.0.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.2",
-    "prettier": "~2.8.8",
-    "ts-node": "^10.9.1",
-    "typescript": "~5.0.4"
+    "@types/node": "18.19.130",
+    "@types/semver": "7.7.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
+    "oxc-parser": "0.124.0",
+    "oxfmt": "0.44.0",
+    "oxlint": "1.59.0",
+    "oxlint-tsgolint": "0.20.0",
+    "prettier": "3.8.2",
+    "semver": "7.7.4",
+    "tsx": "4.21.0",
+    "typescript": "6.0.2"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
+      "oxlint --fix",
       "prettier --write"
     ],
     "*.{css,less,sass}": [

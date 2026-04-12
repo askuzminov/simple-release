@@ -13,24 +13,34 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip ci')"
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with: { fetch-depth: 0 }
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Generate App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
         with:
-          node-version: 18
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Setup NPM
+        run: echo '//npm.pkg.github.com/:_authToken=${{ github.token }}' >> ~/.npmrc
       - name: Set Branch
         id: branch
         run: |
           BNAME="$(echo -n ${GITHUB_REF##*/} | sed 's#/#-#g' | tr '[:upper:]' '[:lower:]')"
           BID="$GITHUB_RUN_NUMBER-$(date +%s)"
           echo "BRANCH_NAME=$BNAME" >> $GITHUB_ENV
-          echo "APP_BUILD=$BID-$GITHUB_SHA" >> $GITHUB_ENV
           echo "BUILD_ID=$BID" >> $GITHUB_ENV
       - name: Setup GIT
         run: |
@@ -38,25 +48,23 @@ jobs:
           git config --local user.name "GitHub Action"
           mkdir -p ~/.ssh
           ssh-keyscan github.com > ~/.ssh/known_hosts
-      - name: Setup NPM
-        run: |
-          echo "Setup NPM"
-          echo 'always-auth=true' > ~/.npmrc
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-          echo '//npm.pkg.github.com/:_authToken=${GH_TOKEN}' >> ~/.npmrc
       - name: Install dependencies
         run: npm ci
       - name: Check
         run: |
           npm run check-types
           npm run lint
+      - name: Test
+        run: npm test
       - name: Build
         run: npm run build
-      - name: Release GITHUB
+      - name: Release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           if [[ $BRANCH_NAME == 'master' ]]; then
             echo "Release production"
-            npm run release publish-github publish-npmjs
+            npm run release -- publish-github publish-npmjs provenance
           else
             echo "Release canary"
             npm run release -- publish-github prerelease=$BRANCH_NAME.$BUILD_ID

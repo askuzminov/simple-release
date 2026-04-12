@@ -56,3 +56,12 @@ export interface Markdown {
 
 export type ParseConfig = ReturnType<typeof parse>;
 export type Repo = ReturnType<typeof getRepo>;
+
+export interface PackageContext {
+  dir: string;
+  name: string;
+  version: string;
+  pack: Pack;
+  tagPrefix: string;
+  files: string[];
+}

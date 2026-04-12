@@ -1,7 +1,7 @@
 import { whitelist } from './config';
 import { Markdown } from './types';
 
-const last = (arr: string[]) => arr[arr.length - 1].slice(-1) !== '\n';
+const last = (arr: string[]) => arr.length > 0 && arr[arr.length - 1].slice(-1) !== '\n';
 
 export function makeMD({ url, config, version, tag, date }: Markdown) {
   const md = ['', `## ${url ? `[${version}](${url}/compare/${tag}...${version})` : version} (${date})`];

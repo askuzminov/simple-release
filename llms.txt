@@ -1,0 +1,119 @@
+# simple-release
+
+> Zero-dependency CLI for automated npm package releases with conventional commits, monorepo/workspace support, and multi-registry publishing.
+
+## Install
+
+```bash
+npm i @askuzminov/simple-release
+```
+
+## Quick start
+
+```json
+{
+  "scripts": {
+    "release": "simple-release publish-npmjs"
+  }
+}
+```
+
+## Commands
+
+### Release control
+- `help` — command list
+- `prerelease` — only bump version
+- `prerelease=ID` — bump with custom prerelease ID (e.g. `prerelease=beta`)
+- `enable-prerelease` — force full process for prerelease
+- `disable-push` — no git push
+- `disable-git` — no git commit/tag
+- `disable-md` — no CHANGELOG.md
+- `disable-github` — no GitHub/GitLab release
+- `dry-run` — preview without changes
+- `verbose` — detailed output
+- `provenance` — npm provenance attestation
+
+### Publish
+- `publish-github` — GitHub Packages registry
+- `publish-npmjs` — npmjs.org registry
+- `--publish-custom URL` — custom registry
+
+### Mode
+- `--mode publish` (default)
+- `--mode current-version` — stdout current version
+- `--mode next-version` — stdout next version
+- `--mode has-changes` — stdout true/false
+
+### Options
+- `--match PATTERN` — filter git tags (glob)
+- `--file PATH` — filter files (git pathspec, repeatable)
+- `--version FORMAT` — version format, default `v{VERSION}`
+- `--source-repo URL` — custom source repo for links
+- `--release-repo URL` — custom release repo for links
+
+### Workspace (monorepo)
+- `no-workspace` — force single-package mode
+- `--workspace NAME` — select specific packages (repeatable)
+- `--contents DIR` — publish from subdirectory
+- `--cascade MODE` — cross-package deps: `full` (default), `lazy`, `none`
+
+## Commit format
+
+```
+<type>(scope)!: description
+```
+
+Types: `break` (MAJOR), `feat` (MINOR), `fix` `build` `chore` `ci` `docs` `perf` `refactor` `revert` `style` `test` (PATCH)
+
+Breaking change: `!` after type/scope, or `BREAKING CHANGES:` in body.
+
+## Workspace example
+
+```json
+{
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "release": "simple-release --contents dist --cascade full publish-npmjs"
+  }
+}
+```
+
+Auto-detects: `package.json` workspaces (npm/yarn/bun), `pnpm-workspace.yaml` (pnpm).
+
+## Cascade modes
+
+- `full` — always bump + publish dependents
+- `lazy` — bump only when range doesn't cover new version (e.g. `^1.0.0` covers `1.1.0` → skip)
+- `none` — only packages with actual code changes
+
+## Environment variables
+
+- `GH_TOKEN` — GitHub token for releases and packages
+- `CI_JOB_TOKEN` — GitLab token (auto-detected via `CI_JOB_ID`)
+
+## Lifecycle scripts
+
+Order: `preversion` → write version → `version` → git commit/tag/push → `postversion`
+
+## Config in package.json
+
+```json
+{
+  "simple-release": {
+    "contents": "dist",
+    "cascade": "full"
+  }
+}
+```
+
+## Lint
+
+```bash
+# .husky/commit-msg
+simple-release-lint $1
+```
+
+## Links
+
+- [Full documentation](https://github.com/askuzminov/simple-release)
+- [npm](https://www.npmjs.com/package/@askuzminov/simple-release)

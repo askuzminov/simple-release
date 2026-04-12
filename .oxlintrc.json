@@ -1,0 +1,112 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "import", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "options": {
+    "typeAware": true
+  },
+  "ignorePatterns": ["dist/**", "node_modules/**"],
+  "env": {
+    "builtin": true,
+    "node": true,
+    "browser": true
+  },
+  "rules": {
+    // === TypeScript rules ===
+    "typescript/adjacent-overload-signatures": "error",
+    "typescript/array-type": ["error", { "default": "array" }],
+    "typescript/no-empty-interface": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-this-alias": "error",
+    "typescript/no-var-requires": "error",
+    "typescript/prefer-for-of": "error",
+    "typescript/prefer-function-type": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    "typescript/unified-signatures": "error",
+    "typescript/no-restricted-types": [
+      "error",
+      {
+        "types": {
+          "Object": { "message": "Avoid using the `Object` type. Did you mean `object`?" },
+          "Function": {
+            "message": "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."
+          },
+          "Boolean": { "message": "Avoid using the `Boolean` type. Did you mean `boolean`?" },
+          "Number": { "message": "Avoid using the `Number` type. Did you mean `number`?" },
+          "String": { "message": "Avoid using the `String` type. Did you mean `string`?" },
+          "Symbol": { "message": "Avoid using the `Symbol` type. Did you mean `symbol`?" }
+        }
+      }
+    ],
+
+    // Type-aware typescript rules
+    "typescript/dot-notation": "error",
+    "typescript/strict-boolean-expressions": "error",
+    "typescript/no-unsafe-member-access": "error",
+    "typescript/no-unsafe-call": "error",
+    "typescript/no-unsafe-assignment": "error",
+    "typescript/no-unsafe-return": "error",
+    "typescript/restrict-template-expressions": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+
+    // === ESLint core rules ===
+    "eslint/constructor-super": "error",
+    "eslint/default-case": "error",
+    "eslint/eqeqeq": "error",
+    "eslint/no-caller": "error",
+    "eslint/no-cond-assign": "error",
+    "eslint/no-console": "error",
+    "eslint/no-constant-condition": "error",
+    "eslint/no-debugger": "error",
+    "eslint/no-duplicate-case": "error",
+    "eslint/no-duplicate-imports": "error",
+    "eslint/no-eval": "error",
+    "eslint/no-extra-bind": "error",
+    "eslint/no-fallthrough": "error",
+    "eslint/no-new-func": "error",
+    "eslint/no-new-wrappers": "error",
+    "eslint/no-redeclare": "error",
+    "eslint/no-sequences": "error",
+    "eslint/no-shadow": "error",
+    "eslint/no-sparse-arrays": "error",
+    "eslint/no-template-curly-in-string": "error",
+    "eslint/no-throw-literal": "error",
+    "eslint/no-unsafe-finally": "error",
+    "eslint/no-unused-labels": "error",
+    "eslint/no-unused-expressions": "error",
+    "eslint/no-var": "error",
+    "eslint/object-shorthand": "error",
+    "eslint/prefer-const": "error",
+    "eslint/prefer-object-spread": "error",
+    "eslint/prefer-template": "error",
+    "eslint/radix": "error",
+    "eslint/use-isnan": "warn",
+    "eslint/complexity": ["warn", { "max": 20 }],
+    "eslint/max-classes-per-file": ["error", { "max": 1 }],
+    "eslint/sort-imports": ["error", { "ignoreDeclarationSort": true }],
+    "eslint/prefer-rest-params": "warn",
+
+    // === Unicorn rules ===
+    "unicorn/filename-case": "error"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**"],
+      "rules": {
+        "typescript/no-floating-promises": "off"
+      }
+    },
+    {
+      "files": ["src/lint.ts", "src/log.ts"],
+      "rules": {
+        "eslint/no-console": "off"
+      }
+    }
+  ]
+}

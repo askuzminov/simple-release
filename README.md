@@ -1,16 +1,21 @@
 # Simple release
 
+[![npm](https://img.shields.io/npm/v/@askuzminov/simple-release)](https://www.npmjs.com/package/@askuzminov/simple-release)
+[![license](https://img.shields.io/npm/l/@askuzminov/simple-release)](https://github.com/askuzminov/simple-release/blob/master/LICENSE)
+
 Full auto pipeline for simple releases your packages.
 
 - Collect git history for auto release
 - Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines
 - Generate CHANGELOG.md
-- Update package.json, package-lock.json
+- Update package.json, package-lock.json, npm-shrinkwrap.json
 - Parse body commits as Markdown, support utf-8 and emoji 🚀
 - Commit, tag and push new version
-- Upload release on Github
-- Upload package on Github
-- Upload package on Npmjs.org
+- Upload release on Github / Gitlab
+- Upload package on Github / Npmjs.org
+- Workspace / monorepo support (npm, yarn, pnpm, bun)
+- Auto-detect package manager for publish
+- Lifecycle scripts support (preversion, version, postversion)
 - Zero dependencies
 
 ## Install
@@ -19,9 +24,17 @@ Full auto pipeline for simple releases your packages.
 npm i @askuzminov/simple-release
 ```
 
-## CLI
+## Init
 
-package.json
+Setup initial version in package.json before first release:
+
+| Start with             | fix →   | feat →  | break → |
+| ---------------------- | ------- | ------- | ------- |
+| `"version": "0.0.0"`   | `0.0.1` | `0.1.0` | `1.0.0` |
+| `"version": "0.0.0-0"` | `0.0.0` | `0.0.0` | `0.0.0` |
+| `"version": "1.0.0-0"` | `1.0.0` | `1.0.0` | `1.0.0` |
+
+## CLI
 
 ```json
 "scripts": {
@@ -35,87 +48,89 @@ npm run release
 
 ## Commands
 
-- **help** -> get command list
+### Release control
 
-  ```bash
-  simple-release help
-  ```
+| Command             | Description                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `help`              | Get command list                                                                                            |
+| `prerelease`        | Only up version, no git changes and release                                                                 |
+| `prerelease=ID`     | Only up version with custom prerelease ID                                                                   |
+| `enable-prerelease` | Force full process for prerelease                                                                           |
+| `disable-push`      | Prevent git push                                                                                            |
+| `disable-git`       | Prevent git commit and tag                                                                                  |
+| `disable-md`        | Prevent write CHANGELOG.md                                                                                  |
+| `disable-github`    | Prevent Github / Gitlab release                                                                             |
+| `dry-run`           | Show what would happen without making changes                                                               |
+| `verbose`           | Show detailed output (commits, changelog preview)                                                           |
+| `provenance`        | Generate [provenance attestation](https://docs.npmjs.com/generating-provenance-statements/) when publishing |
 
-- **prerelease** -> only up version, not git changes and release
+```bash
+# Release without git push
+simple-release disable-push publish-npmjs
 
-  ```bash
-  simple-release prerelease
-  ```
+# Only bump version, no git, no publish
+simple-release disable-git disable-github
 
-- **prerelease=SOME.NEW.VERSION** -> only up version with custom ID
+# Preview what would happen
+simple-release dry-run
 
-  ```bash
-  simple-release prerelease=1.2.0
-  ```
+# Detailed output
+simple-release verbose publish-npmjs
+```
 
-- **enable-prerelease** -> force full process
+### Publish
 
-  ```bash
-  simple-release enable-prerelease
-  ```
+| Command                | Description                |
+| ---------------------- | -------------------------- |
+| `publish-github`       | Publish in Github registry |
+| `publish-npmjs`        | Publish in Npmjs registry  |
+| `--publish-custom URL` | Publish in custom registry |
 
-- **disable-push** -> prevent git push
+```bash
+simple-release publish-github publish-npmjs
+simple-release --publish-custom https://your_domain/npm/ --publish-custom https://other_domain/npm/
 
-  ```bash
-  simple-release disable-push
-  ```
+# Publish to all registries at once
+simple-release publish-github publish-npmjs --publish-custom https://your_domain/npm/
+```
 
-- **disable-git** -> prevent git commit and tag
+### Mode
 
-  ```bash
-  simple-release disable-git
-  ```
+```bash
+simple-release --mode publish           # Default
+simple-release --mode current-version   # Return current version
+simple-release --mode next-version      # Return next version
+simple-release --mode has-changes       # Return true | false
+```
 
-- **disable-md** -> prevent write CHANGELOG.md
+Usage in scripts:
 
-  ```bash
-  simple-release disable-md
-  ```
+```bash
+# Get current version
+VERSION=$(simple-release --mode current-version)
 
-- **disable-github** -> prevent github release
-
-  ```bash
-  simple-release disable-github
-  ```
-
-- **publish-github** -> publish in github registry
-
-  ```bash
-  simple-release publish-github
-  ```
-
-- **publish-npmjs** -> publish in npmjs registry
-
-  ```bash
+# Conditional release
+if [ "$(simple-release --mode has-changes)" = "true" ]; then
   simple-release publish-npmjs
-  ```
+fi
+```
 
-- **--publish-custom** -> publish in list of customs registries
+### Prerelease
 
-  ```bash
-  simple-release --publish-custom https://your_domain_name/npm/ --publish-custom https://other_domain_name/api/npm
-  ```
+```bash
+# Prerelease with auto ID: 1.2.3 → 1.2.4-pre.0
+simple-release prerelease
 
-- **--mode** -> Mode:
+# Prerelease with custom ID: 1.2.3 → 1.2.4-beta.0
+simple-release prerelease=beta
 
-  - publish (default);
-  - current-version (return current version);
-  - next-version (return next version);
-  - has-changes (return true | false).
+# Full release process for prerelease (git, changelog, publish)
+simple-release enable-prerelease prerelease=beta publish-npmjs
+```
 
-  ```bash
-  simple-release --mode publish # Default
-  simple-release --mode current-version # Return current npm version
-  simple-release --mode next-version # Return next npm version
-  simple-release --mode has-changes # Return true | false
-  ```
+### Filtering
 
-- **--match** -> Match only needed tags in git history
+- **--match** - Match only needed tags in git history
 
   Using [glob(7)](https://man7.org/linux/man-pages/man7/glob.7.html)
 
@@ -124,18 +139,16 @@ npm run release
   simple-release --match='v[0-9]*'
   ```
 
-- **--file** -> Filter files for include/exclude
+- **--file** - Filter files for include/exclude
 
   By default, all files are included except those described in `.gitignore`
 
   Include:
-
   - folder
   - folder/file
   - folder/\*.css
 
   Exclude:
-
   - :!folder
   - :!folder/\*file
   - :(exclude)folder
@@ -146,7 +159,7 @@ npm run release
   simple-release --file=src --file=types --file='folder/*.css' --file=':!dist'
   ```
 
-- **--version** -> Custom format for version, default `v{VERSION}`
+- **--version** - Custom format for version, default `v{VERSION}`
 
   ```bash
   simple-release --version v{VERSION}
@@ -154,7 +167,7 @@ npm run release
   simple-release --version @my-org/my-lib@{VERSION}
   ```
 
-- **--source-repo** -> Custom path to links for sourcecode
+- **--source-repo** - Custom path to links for sourcecode
 
   Default from `package.json`: `repository.url`
 
@@ -164,7 +177,7 @@ npm run release
   simple-release --source-repo https://github.com/askuzminov/simple-release.git
   ```
 
-- **--release-repo** -> Custom path to links for release notes
+- **--release-repo** - Custom path to links for release notes
 
   Default from `package.json`: `repository.url`
 
@@ -174,28 +187,263 @@ npm run release
   simple-release --release-repo https://github.com/askuzminov/simple-release.git
   ```
 
+## Workspace / Monorepo
+
+Workspaces are auto-detected from:
+
+- `package.json` `workspaces` field (npm, yarn, bun)
+- `pnpm-workspace.yaml` (pnpm)
+
+When workspaces are detected, simple-release will:
+
+1. Discover all packages
+2. Detect changes per package (git log scoped to package directory)
+3. Bump versions independently for changed packages
+4. Update cross-package dependencies
+5. Create a single git commit with all version bumps
+6. Create separate git tags per package (`@org/pkg@1.2.0`)
+7. Push once
+8. Create releases and publish for each changed package
+
+### Workspace commands
+
+| Command            | Description                                  |
+| ------------------ | -------------------------------------------- |
+| `no-workspace`     | Force single-package mode even in a monorepo |
+| `--workspace NAME` | Select specific packages                     |
+| `--contents DIR`   | Publish from subdirectory (e.g. `dist`)      |
+| `--cascade MODE`   | Cross-package dependency updates             |
+
+### Cascade modes
+
+| Mode             | Behavior                                       | Best for                                        |
+| ---------------- | ---------------------------------------------- | ----------------------------------------------- |
+| `full` (default) | Always bump + publish dependents               | Enterprise, strict CI, npm registry consistency |
+| `lazy`           | Bump only when range doesn't cover new version | Libraries with semver ranges, fewer releases    |
+| `none`           | Only release packages with actual code changes | Manual control, independent teams               |
+
+`devDependencies` and `peerDependencies` are never cascaded in any mode.
+
+#### How `full` works
+
+When `@org/core@1.1.0` is released:
+
+- `@org/app` depends on `"@org/core": "^1.0.0"` → update to `"^1.1.0"` + patch bump + publish
+- `@org/app` depends on `"@org/core": "workspace:*"` → patch bump + publish (PM resolves version)
+- Always guarantees npm registry has the latest dependency versions
+
+#### How `lazy` works
+
+When `@org/core@1.1.0` is released:
+
+- `@org/app` depends on `"@org/core": "^1.0.0"` → **skip** (`^1.0.0` already covers `1.1.0`)
+- `@org/app` depends on `"@org/core": "~1.0.0"` → **bump** (`~1.0.0` doesn't cover `1.1.0`)
+- `@org/app` depends on `"@org/core": "1.0.0"` → **bump** (exact, doesn't cover `1.1.0`)
+- `@org/app` depends on `"@org/core": "workspace:*"` → **bump** (exact, always broken)
+- `@org/app` depends on `"@org/core": "workspace:^"` → **skip** (resolves to `^1.0.0`, covers `1.1.0`)
+- `@org/app` depends on `"@org/core": "workspace:~"` → **bump** (resolves to `~1.0.0`, doesn't cover `1.1.0`)
+
+When `@org/core@2.0.0` (major) is released:
+
+- `@org/app` depends on `"@org/core": "^1.0.0"` → **bump** (`^1.0.0` doesn't cover `2.0.0`)
+- `@org/app` depends on `"@org/core": "workspace:^"` → **bump** (resolves to `^1.0.0`, doesn't cover `2.0.0`)
+
+#### How `none` works
+
+- Only packages with actual git changes are released
+- Cross-package dependencies are not updated
+- Use when each team owns their package and manages deps manually
+
+#### Choosing a mode
+
+```text
+Do your packages have consumers outside the monorepo (published to npm)?
+├─ Yes
+│   Do you use semver ranges (^, ~) between packages?
+│   ├─ Yes → lazy (fewer releases, ranges handle compatibility)
+│   └─ No (exact or workspace:*) → full (always keep npm in sync)
+└─ No (internal only / private packages)
+    └─ none (no need to publish dependents)
+```
+
+### Example monorepo setup
+
+npm / yarn / bun:
+
+```text
+my-monorepo/
+  package.json          # { "workspaces": ["packages/*"] }
+  packages/
+    core/
+      package.json      # { "name": "@org/core", "version": "1.0.0" }
+    utils/
+      package.json      # { "name": "@org/utils", "version": "2.0.0" }
+```
+
+pnpm:
+
+```text
+my-monorepo/
+  package.json
+  pnpm-workspace.yaml   # packages: \n  - 'packages/*'
+  packages/
+    core/
+      package.json      # { "name": "@org/core", "version": "1.0.0" }
+    utils/
+      package.json      # { "name": "@org/utils", "version": "2.0.0" }
+```
+
+```bash
+# Release all changed packages
+simple-release publish-npmjs
+
+# Release specific packages only
+simple-release --workspace @org/core publish-npmjs
+
+# Publish from dist/ subdirectory
+simple-release --contents dist publish-npmjs
+
+# Disable cascade
+simple-release --cascade none publish-npmjs
+```
+
+## Package Manager Support
+
+The package manager is auto-detected by lockfile:
+
+| Lockfile                                | Package Manager |
+| --------------------------------------- | --------------- |
+| package-lock.json / npm-shrinkwrap.json | npm             |
+| bun.lock / bun.lockb                    | bun             |
+| pnpm-lock.yaml                          | pnpm            |
+| yarn.lock                               | yarn            |
+
+The detected PM is used for `publish`. All other operations (version bump, lifecycle scripts, git) are PM-independent.
+
+> Registry is passed via `--registry` flag (npm, pnpm, bun) or `YARN_REGISTRY` env var (yarn). Multi-registry publishing works with all package managers.
+
+## Publishing to npmjs.org
+
+### Authentication options
+
+| Method                                                                             | Token lifetime     | 2FA        | Best for                   |
+| ---------------------------------------------------------------------------------- | ------------------ | ---------- | -------------------------- |
+| [Granular Access Token](https://docs.npmjs.com/creating-and-viewing-access-tokens) | Up to 90 days      | Bypass 2FA | CI with token rotation     |
+| [OIDC Trusted Publishing](https://docs.npmjs.com/trusted-publishers/)              | Per-job (no token) | Not needed | GitHub Actions / GitLab CI |
+
+> Classic npm tokens were [revoked in December 2025](https://github.blog/changelog/2025-12-09-npm-classic-tokens-revoked-session-based-auth-and-cli-token-management-now-available/). Use granular tokens or OIDC instead.
+
+### Granular Access Token
+
+1. Create token at [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens)
+2. Set permissions: **Read and write**, select packages, enable **Bypass 2FA**
+3. Add to CI secrets as `NPM_TOKEN`
+
+```bash
+echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+simple-release publish-npmjs
+```
+
+### OIDC Trusted Publishing (no tokens)
+
+Setup on npmjs.com: **Package → Settings → Trusted publishing → GitHub Actions** (specify repo and workflow file). Then:
+
+```yml
+permissions:
+  contents: write
+  id-token: write
+
+steps:
+  - uses: actions/checkout@v4
+    with: { fetch-depth: 0 }
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: 24
+      registry-url: https://registry.npmjs.org
+
+  - run: npx @askuzminov/simple-release publish-npmjs
+```
+
+Provenance attestations are generated **automatically** with OIDC — no `provenance` flag needed.
+
+> OIDC requires npm >= 11.5.1. Node 24+ includes it. Node 22 ships with npm 10 — upgrade npm or use Node 24.
+
+### Granular Token + Provenance
+
+No npmjs.org setup needed. Use `provenance` flag with a granular token:
+
+```yml
+permissions:
+  contents: write
+  id-token: write # Required for provenance
+
+steps:
+  - uses: actions/checkout@v4
+    with: { fetch-depth: 0 }
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: 24
+      registry-url: https://registry.npmjs.org
+
+  - run: npx @askuzminov/simple-release publish-npmjs provenance
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+> **Note:** Provenance and OIDC apply only to **npmjs.org**. GitHub Packages and GitLab registries use their own auth (`GITHUB_TOKEN`, `CI_JOB_TOKEN`) and are not affected by these changes.
+
+## Lifecycle Scripts
+
+Lifecycle scripts from `package.json` are executed in this order:
+
+1. `preversion` - before version bump (e.g. run tests)
+2. Version is written to package.json + lockfiles
+3. `version` - after version bump (e.g. build)
+4. Git commit, tag, push
+5. `postversion` - after git operations (e.g. cleanup)
+
+Scripts are executed via shell directly, not through a package manager. The `npm_package_version` environment variable is set to the new version.
+
+```json
+"scripts": {
+  "preversion": "npm test",
+  "version": "npm run build",
+  "postversion": "echo Released!"
+}
+```
+
 ## Lint
 
-Check commit message on:
+Check commit message with husky:
+
+Husky v9+ (`.husky/commit-msg`):
+
+```bash
+simple-release-lint $1
+```
+
+Husky v4 (`package.json`):
 
 ```json
 "husky": {
   "hooks": {
     "commit-msg": "simple-release-lint"
   }
-},
+}
 ```
 
-Schemas of message:
+### Schemas of message
 
 - `<type>: <description>` - simple variant
 - `<type>(scope): <description>` - with some scope
 - `<type>!: <description>` - breaking change
 - `<type>(scope)!: <description>` - breaking change with scope
 
-Example with body
+Example with body:
 
-```bash
+```text
 feat(ABC-123): New solution
 
 - Add [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -204,7 +452,7 @@ feat(ABC-123): New solution
 
 Example with breaking change:
 
-```bash
+```text
 refactor(core): Migrate on new solution
 
 BREAKING CHANGES: should upgrade version
@@ -213,24 +461,26 @@ Some specs...
 
 ## Available types
 
-- **break** - `MAJOR` Breaking changes
-- **feat** - `MINOR` Features
-- **build** - `PATCH` Build system or external dependencies
-- **chore** - `PATCH` Chore
-- **ci** - `PATCH` Continuous Integration
-- **docs** - `PATCH` Documentation
-- **fix** - `PATCH` Bug Fixes
-- **perf** - `PATCH` Performance
-- **refactor** - `PATCH` Refactoring
-- **revert** - `PATCH` Revert code
-- **style** - `PATCH` Styles and formatting
-- **test** - `PATCH` Tests
+| Type         | Bump    | Description                           |
+| ------------ | ------- | ------------------------------------- |
+| **break**    | `MAJOR` | Breaking changes                      |
+| **feat**     | `MINOR` | Features                              |
+| **build**    | `PATCH` | Build system or external dependencies |
+| **chore**    | `PATCH` | Chore                                 |
+| **ci**       | `PATCH` | Continuous Integration                |
+| **docs**     | `PATCH` | Documentation                         |
+| **fix**      | `PATCH` | Bug Fixes                             |
+| **perf**     | `PATCH` | Performance                           |
+| **refactor** | `PATCH` | Refactoring                           |
+| **revert**   | `PATCH` | Revert code                           |
+| **style**    | `PATCH` | Styles and formatting                 |
+| **test**     | `PATCH` | Tests                                 |
 
 For `MAJOR` can be used `!` (example `refactor!: new lib`).
 
 For `MAJOR` also can be used `BREAKING CHANGES:` or `BREAKING CHANGE:` in description of commit.
 
-## Ignored commits in lint
+### Ignored commits
 
 - Merge pull request
 - Merge remote-tracking branch
@@ -245,60 +495,443 @@ For `MAJOR` also can be used `BREAKING CHANGES:` or `BREAKING CHANGE:` in descri
 - fixup
 - squash
 
-## Scripts
+## Config in package.json
 
-Used standard scripts for <https://docs.npmjs.com/cli/version>.
+Instead of repeating CLI flags, configure defaults in `package.json`:
 
 ```json
-"scripts": {
-  "preversion": "npm test",
-  "version": "npm run build",
-  "postversion": "npm run clean"
+{
+  "simple-release": {
+    "contents": "dist",
+    "cascade": "full"
+  }
 }
 ```
 
-And when enable publish, used standard scripts for <https://docs.npmjs.com/cli/publish>.
+CLI flags always override config values.
 
-See full list of scripts in <https://docs.npmjs.com/misc/scripts#description>.
+## Exit codes
 
-## Init v1.0.0
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| `0`  | Success (or no changes found)                        |
+| `1`  | Error (git failure, script failure, publish failure) |
 
-Setup package.json
+`--mode has-changes` returns exit code `0` in both cases — use the stdout output (`true`/`false`) to determine result.
 
-```json
-"version": "1.0.0-0",
+## How it works
+
+```text
+git log → parse conventional commits → calculate version bump
+  ↓
+preversion script → bump package.json + lockfiles → version script
+  ↓
+generate CHANGELOG.md
+  ↓
+git add → git commit → git tag → git push
+  ↓
+postversion script → github/gitlab release → npm publish
+```
+
+Single package: one commit + one tag
+
+```text
+commit: chore(release): v1.2.3 [skip ci]
+tag:    v1.2.3
+```
+
+Monorepo: one commit + tag per changed package
+
+```text
+commit: chore(release): publish [skip ci]
+        - @org/core@1.2.0
+        - @org/utils@3.1.0
+tags:   @org/core@1.2.0
+        @org/utils@3.1.0
+```
+
+## Generated CHANGELOG.md
+
+```markdown
+# Changelog
+
+All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
+
+## [v1.2.0](https://github.com/user/repo/compare/v1.1.0...v1.2.0) (2026-04-10)
+
+### Features
+
+- **auth**: add OAuth2 support ([abc1234](https://github.com/user/repo/commit/abc1234...))
+- new dashboard page ([def5678](https://github.com/user/repo/commit/def5678...))
+
+### Bug Fixes
+
+- **api**: fix rate limiting ([fed8765](https://github.com/user/repo/commit/fed8765...))
+```
+
+## Environment variables
+
+### Github
+
+| Variable            | Required     | Description                          |
+| ------------------- | ------------ | ------------------------------------ |
+| `GH_TOKEN`          | For releases | Github token (PAT or `GITHUB_TOKEN`) |
+| `GITHUB_SERVER_URL` | No           | Default: `https://github.com`        |
+| `GITHUB_REPOSITORY` | No           | Fallback repo (e.g. `user/repo`)     |
+
+`GITHUB_TOKEN` (native) works if workflow has `permissions: contents: write`.
+For protected branches with required reviews, `GITHUB_TOKEN` cannot push directly. Options:
+
+| Approach                                      | Pros                                                                 | Cons                                        |
+| --------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| [GitHub App](#github-app-setup) (recommended) | Bypass branch protection, reusable across repos, no personal account | One-time setup                              |
+| PAT (Fine-grained)                            | Simple setup                                                         | Tied to personal account, max 1 year expiry |
+| `disable-push` + PR                           | Works with `GITHUB_TOKEN`                                            | Requires manual merge of release PR         |
+| Deploy key with write access                  | No personal account needed                                           | Cannot create GitHub Releases via API       |
+
+### GitHub App setup
+
+One-time setup, works across all your repos:
+
+**1. Create App:**
+
+GitHub → Settings → Developer settings → [GitHub Apps → New](https://github.com/settings/apps/new)
+
+- App name: `simple-release-bot`
+- Webhook: **uncheck** Active
+- Permissions:
+  - Repository → **Contents: Read and write** (git push, tags, releases)
+  - Repository → **Metadata: Read-only** (required)
+- Where can this app be installed: **Only on this account**
+
+**2. Install App:**
+
+App page → Install App → select repos (all or specific)
+
+> If you add new permissions later, go to Installation → **Accept new permissions** to apply them.
+
+**3. Generate private key:**
+
+App page → General → Private keys → **Generate a private key** → save `.pem` file
+
+**4. Add secrets to each repo** (or use `gh` CLI for bulk):
+
+```bash
+# Get App ID from app page → General → About
+APP_ID=123456
+
+# Add to all repos at once
+for repo in my-repo-1 my-repo-2 my-repo-3; do
+  gh secret set APP_ID --repo yourname/$repo --body "$APP_ID"
+  gh secret set APP_PRIVATE_KEY --repo yourname/$repo < app-private-key.pem
+done
+```
+
+**5. Allow bypass in branch protection:**
+
+Repo → Settings → Branches → Edit rule → Allow specified actors to bypass → add your App
+
+**6. Workflow** (copy to any repo):
+
+```yml
+- name: Generate App Token
+  id: app-token
+  uses: actions/create-github-app-token@v1
+  with:
+    app-id: ${{ secrets.APP_ID }}
+    private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+- name: Checkout
+  uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+    token: ${{ steps.app-token.outputs.token }}
+```
+
+Use `${{ steps.app-token.outputs.token }}` as `GH_TOKEN` for releases. For GitHub Packages publish, use `${{ github.token }}` (App tokens [cannot publish packages](https://github.com/orgs/community/discussions/78090)).
+
+See [full workflow example](#github-actions).
+
+### Gitlab
+
+| Variable               | Required     | Description                   |
+| ---------------------- | ------------ | ----------------------------- |
+| `CI_JOB_TOKEN`         | For releases | Gitlab job token              |
+| `CI_SERVER_HOST`       | For releases | Gitlab domain                 |
+| `CI_PROJECT_ID`        | For releases | Gitlab project ID             |
+| `CI_JOB_ID`            | Auto         | Presence triggers Gitlab mode |
+| `CI_SERVER_URL`        | No           | Gitlab server URL             |
+| `CI_PROJECT_NAMESPACE` | No           | Fallback namespace            |
+| `CI_PROJECT_NAME`      | No           | Fallback project name         |
+
+> Gitlab is auto-detected when `CI_JOB_ID` is set (present in all Gitlab CI pipelines).
+
+`CI_JOB_TOKEN` inherits permissions of the user who triggered the pipeline. For protected branches, use a [Group/Project Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html) with Maintainer role (see [Gitlab CI example](#gitlab-ci)).
+
+## Edge cases
+
+**First release (no tags exist):**
+Full git history from initial commit is used. All commits will appear in the first CHANGELOG entry.
+
+**No changes detected:**
+Nothing happens — no version bump, no commit, no publish. Exit code 0.
+
+**Prerelease to release transition:**
+
+```text
+1.0.0 → prerelease=beta → 1.0.1-beta.0 → prerelease=beta → 1.0.1-beta.1 → (release) → 1.0.1
+```
+
+**Multiple breaking changes:**
+Only one major bump per release, regardless of how many breaking commits.
+
+**Unknown commit types:**
+Commits that don't match any known type (e.g. `update: something`) are grouped under "Others changes" with a patch bump.
+
+**Empty commit body:**
+Supported — only the title line is required.
+
+**`[skip ci]` in release commit:**
+Added automatically to prevent CI loops: `chore(release): v1.2.3 [skip ci]`
+
+**`package-lock.json` missing:**
+Silently skipped — works fine without lockfiles.
+
+**Monorepo package without changes:**
+Skipped entirely — no bump, no tag, no publish for unchanged packages.
+
+**Lifecycle script fails:**
+Process stops immediately. No git commit, no publish. Fix the issue and run again.
+
+**Git push fails:**
+Tags and commits are created locally but not pushed. Run `git push && git push --tags` manually after fixing.
+
+**Publish partially fails (git already pushed):**
+Re-running the workflow won't help — no changes detected after `[skip ci]` commit. Publish failed packages manually:
+
+```bash
+# Check which version was released
+git log --oneline -1
+
+# Publish manually to the failed registry
+cd dist  # if using --contents
+npm publish --registry https://registry.npmjs.org --tag latest
+```
+
+**GitHub Release not created (git already pushed):**
+Create release manually on GitHub → Releases → Draft new release → select existing tag.
+
+## Requirements
+
+- Node.js >= 10.12 (or Bun)
+- Git
+- Works on Linux, macOS, Windows
+
+## Why simple-release?
+
+|                           | simple-release     | lerna (9+)           | changesets                                                | semantic-release                                               |
+| ------------------------- | ------------------ | -------------------- | --------------------------------------------------------- | -------------------------------------------------------------- |
+| Dependencies              | 0                  | 50+ (requires Nx)    | 20+                                                       | 30+                                                            |
+| Setup                     | 1 line             | lerna.json + nx.json | Config files                                              | Plugins                                                        |
+| Monorepo                  | Built-in           | Built-in             | Built-in                                                  | [Plugin](https://github.com/pmowrer/semantic-release-monorepo) |
+| Independent versioning    | Built-in           | Built-in             | Built-in                                                  | Plugin                                                         |
+| Topological sort          | Built-in           | Built-in             | [No](https://github.com/changesets/changesets/issues/238) | No                                                             |
+| Cross-package cascade     | full / lazy / none | Full only            | Full only                                                 | No                                                             |
+| Conventional commits      | Built-in           | Built-in             | Manual                                                    | Plugin                                                         |
+| Commit lint               | Built-in           | commitlint           | commitlint                                                | commitlint                                                     |
+| Changelog                 | Built-in           | Built-in             | Built-in                                                  | Plugin                                                         |
+| Github + Gitlab           | Built-in           | Github only          | Github only                                               | Plugin                                                         |
+| npm / bun / pnpm / yarn   | All built-in       | npm                  | npm / pnpm / yarn                                         | npm                                                            |
+| Lifecycle scripts         | Built-in (PM-free) | Via npm              | No                                                        | No                                                             |
+| Prerelease / canary       | Built-in           | Built-in             | Built-in                                                  | Plugin                                                         |
+| Provenance / OIDC         | Built-in           | v9+                  | Via npm                                                   | Plugin                                                         |
+| Multiple registries       | Built-in           | One at a time        | One at a time                                             | One at a time                                                  |
+| Publish from subdirectory | `--contents`       | `contents`           | No                                                        | No                                                             |
+| Node.js                   | >= 10.12           | >= 20.19             | >= 18                                                     | >= 18                                                          |
+
+## Migration from Lerna
+
+### 1. Add workspaces to root package.json
+
+```diff
+ {
+   "name": "@org/monorepo",
++  "workspaces": ["packages/*"],
+   "devDependencies": {
+-    "lerna": "^6.0.0",
++    "@askuzminov/simple-release": "^1"
+   },
+   "scripts": {
+-    "lerna:publish": "lerna publish --create-release github",
+-    "lerna:canary": "lerna publish --canary --amend --allow-branch feature/*"
++    "release": "simple-release --contents dist publish-github",
++    "release:canary": "simple-release --contents dist publish-github prerelease=$BRANCH_NAME.$BUILD_ID"
+   }
+ }
+```
+
+### 2. Replace commitlint with simple-release-lint
+
+`.husky/commit-msg`:
+
+```diff
+-npx commitlint --edit $1
++simple-release-lint $1
+```
+
+Remove `commitlint` and `@commitlint/*` from devDependencies.
+
+### 3. Delete lerna config
+
+```bash
+rm lerna.json
+```
+
+### 4. Mapping lerna options
+
+| lerna.json                                       | simple-release                                      | Notes                                      |
+| ------------------------------------------------ | --------------------------------------------------- | ------------------------------------------ |
+| `"version": "independent"`                       | Default                                             | Always independent                         |
+| `"conventionalCommits": true`                    | Default                                             | Always conventional commits                |
+| `"contents": "dist"`                             | `--contents dist`                                   | Publish from subdirectory                  |
+| `"registry": "https://npm.pkg.github.com"`       | `publish-github`                                    | Or `--publish-custom URL`                  |
+| `"createRelease": "github"`                      | Default                                             | Always creates release when `GH_TOKEN` set |
+| `"message": "chore(release): publish [skip ci]"` | Default                                             | Same format built-in                       |
+| `"ignoreChanges": ["**/*.spec.ts"]`              | `--file ':!**/*.spec.ts'`                           | Git pathspec                               |
+| `"allowBranch": ["master"]`                      | CI-level                                            | Run release only on master in CI           |
+| `lerna publish --canary --preid=ID`              | `prerelease=ID`                                     | Canary releases                            |
+| `lerna run build`                                | `npm run build -ws` or `"version": "npm run build"` | Via npm workspaces or lifecycle            |
+
+### 5. Update CI
+
+```diff
+ # Production release
+-npm run lerna:publish
++npm run release
+
+ # Canary release
+-npm run lerna:canary
++npm run release:canary
+```
+
+### 6. Cross-package dependencies
+
+Lerna updates cross-package deps automatically. simple-release does the same:
+
+- `--cascade full` (default) — always bump + publish dependents (like lerna)
+- `--cascade lazy` — bump only when range doesn't cover new version
+- `--cascade none` — manual management
+
+### 7. Packages not tracked by lerna
+
+If some packages were excluded from `lerna.json`, use `--workspace` to select specific packages:
+
+```bash
+# Release only specific packages
+simple-release --workspace @org/core --workspace @org/utils --contents dist publish-github
 ```
 
 ## Example CI
 
-```bash
-echo "Setup NPM"
-echo 'always-auth=true' > ~/.npmrc
-echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-echo '//npm.pkg.github.com/:_authToken=${GH_TOKEN}' >> ~/.npmrc
+### Github Actions
 
-if [[ $BRANCH_NAME == 'master' ]]; then
-  echo "Release production"
-  npx @askuzminov/simple-release publish-github publish-npmjs
-else
-  echo "Release canary"
-  npx @askuzminov/simple-release publish-github publish-npmjs prerelease=$BRANCH_NAME.$BUILD_ID
-fi
-```
-
-### Github actions
-
-Use fetch-depth for full
+Full example with GitHub App + OIDC (recommended):
 
 ```yml
-- name: Checkout
-  uses: actions/checkout@v3
-  with: { fetch-depth: 0 }
+name: Release
+
+on:
+  push:
+    branches: [master, feature/*]
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    steps:
+      - name: Generate App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Setup NPM
+        run: echo '//npm.pkg.github.com/:_authToken=${{ steps.app-token.outputs.token }}' >> ~/.npmrc
+      - name: Setup GIT
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com > ~/.ssh/known_hosts
+      - name: Install dependencies
+        run: npm ci
+      - name: Check
+        run: |
+          npm run check-types
+          npm run lint
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH_NAME: # set via your branch detection step
+          BUILD_ID: # set via your build ID step
+        run: |
+          if [[ $BRANCH_NAME == 'master' ]]; then
+            npm run release -- publish-github publish-npmjs provenance
+          else
+            npm run release -- publish-github prerelease=$BRANCH_NAME.$BUILD_ID
+          fi
 ```
 
-### Setup GIT example
+Using the action:
 
-Setup branch for push
+```yml
+- uses: actions/checkout@v4
+  with: { fetch-depth: 0 }
+
+- uses: askuzminov/simple-release@v1
+  with:
+    args: 'publish-npmjs publish-github'
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Minimal example with npx (no protected branch push):
+
+```yml
+- uses: actions/checkout@v4
+  with: { fetch-depth: 0 }
+
+- uses: actions/setup-node@v4
+  with: { node-version: 24 }
+
+- run: npx @askuzminov/simple-release publish-npmjs provenance
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Setup GIT
 
 ```bash
 git config --global push.default current
@@ -308,26 +941,14 @@ mkdir -p ~/.ssh
 ssh-keyscan github.com > ~/.ssh/known_hosts
 ```
 
-### Setup custom gitlab example
+### Gitlab CI
 
-Add in .gitignore
+Add `.npmrc` to `.gitignore`.
 
-```md
-.npmrc
-```
-
-Setup package.json
-
-```json
-  "scripts": {
-    "release": "simple-release"
-  },
-```
-
-Setup .gitlab-ci.yml
+Setup `.gitlab-ci.yml`:
 
 ```yml
-image: node:18
+image: node:24
 
 stages:
   - publish
@@ -364,10 +985,8 @@ deploy:
       npm test
     - |
       if [[ $CI_COMMIT_REF_NAME == 'master' ]]; then
-        echo "Release production"
         npm run release -- --publish-custom "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/"
       else
-        echo "Release canary"
         npm run release -- --publish-custom "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" prerelease=$CI_COMMIT_REF_SLUG.$CI_JOB_ID
       fi
 ```
