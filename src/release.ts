@@ -20,21 +20,20 @@ export async function release(
       log('warn', 'Package', 'No repository.url in package.json');
     } else {
       try {
-        log('ok', 'Github', `Run release for ${releaseRepo.user}/${releaseRepo.repository}/`);
+        log('ok', 'Gitlab', `Run release for ${releaseRepo.user}/${releaseRepo.repository}/`);
         const out = await gitlabRelease({
           domain: CI_SERVER_HOST,
           token: CI_JOB_TOKEN,
           projectID: CI_PROJECT_ID,
           setup: {
-            // eslint-disable-next-line camelcase
             tag_name: version,
             name: version + (ARG['enable-prerelease'] ? '-pre' : ''),
             description: md,
           },
         });
-        log('ok', 'Github', out);
+        log('ok', 'Gitlab', out);
       } catch (e) {
-        log('error', 'Github', e);
+        log('error', 'Gitlab', e);
       }
     }
   } else {
@@ -49,7 +48,6 @@ export async function release(
           token: GH_TOKEN,
           path: `/repos/${releaseRepo.user}/${releaseRepo.repository}/releases`,
           setup: {
-            // eslint-disable-next-line camelcase
             tag_name: version,
             name: version,
             body: md,
@@ -64,37 +62,54 @@ export async function release(
   }
 }
 
-export function githubRelease({ token, path, setup }: GithubRelease) {
-  return http(
-    {
-      host: 'api.github.com',
-      port: 443,
-      path,
-      method: 'POST',
-      headers: {
-        Authorization: `token ${token}`,
-        Accept: 'application/json',
-        'user-agent': 'Github-Releaser',
-      },
-    },
-    setup
-  );
+const ghHeaders = (token: string) => ({
+  Authorization: `token ${token}`,
+  Accept: 'application/json',
+  'user-agent': 'Github-Releaser',
+});
+
+export async function githubRelease({ token, path, setup }: GithubRelease) {
+  try {
+    return await http({ host: 'api.github.com', port: 443, path, method: 'POST', headers: ghHeaders(token) }, setup);
+  } catch (e) {
+    // Release may already exist — try to update
+    const tagPath = `${path}/tags/${encodeURIComponent(setup.tag_name)}`;
+    try {
+      const existing = await http(
+        { host: 'api.github.com', port: 443, path: tagPath, method: 'GET', headers: ghHeaders(token) },
+        {}
+      );
+      const id = (JSON.parse(String(existing)) as { id: number }).id;
+      log('info', 'Github', `Release exists, updating ${setup.tag_name}`);
+      return await http(
+        { host: 'api.github.com', port: 443, path: `${path}/${id}`, method: 'PATCH', headers: ghHeaders(token) },
+        setup
+      );
+    } catch {
+      throw e;
+    }
+  }
 }
 
-export function gitlabRelease({ domain, token, projectID, setup }: GitlabRelease) {
-  return http(
-    {
-      host: domain,
-      port: 443,
-      path: `/api/v4/projects/${projectID}/releases`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'PRIVATE-TOKEN': token,
-        Accept: 'application/json',
-        'user-agent': 'Gitlab-Releaser',
-      },
-    },
-    setup
-  );
+export async function gitlabRelease({ domain, token, projectID, setup }: GitlabRelease) {
+  const glHeaders = {
+    'Content-Type': 'application/json',
+    'PRIVATE-TOKEN': token,
+    Accept: 'application/json',
+    'user-agent': 'Gitlab-Releaser',
+  };
+  const path = `/api/v4/projects/${projectID}/releases`;
+
+  try {
+    return await http({ host: domain, port: 443, path, method: 'POST', headers: glHeaders }, setup);
+  } catch (e) {
+    // Release may already exist — try to update
+    const tagPath = `${path}/${encodeURIComponent(setup.tag_name)}`;
+    try {
+      log('info', 'Gitlab', `Release exists, updating ${setup.tag_name}`);
+      return await http({ host: domain, port: 443, path: tagPath, method: 'PUT', headers: glHeaders }, setup);
+    } catch {
+      throw e;
+    }
+  }
 }

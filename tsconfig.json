@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
+    "target": "es2020",
+    "lib": ["es2020"],
+    "types": ["node"],
     "strict": true,
     "allowJs": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "esModuleInterop": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

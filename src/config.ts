@@ -14,7 +14,6 @@ export const {
 export const isGITLAB = typeof CI_JOB_ID === 'string' && CI_JOB_ID !== '';
 
 export const TITLE =
-  // eslint-disable-next-line max-len
   '# Changelog\n\nAll notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.\n';
 
 export const CHANGELOG_FILE = 'CHANGELOG.md';
@@ -37,7 +36,6 @@ export const whitelist: Record<string, string> = {
 export const OTHERS = 'Others changes';
 
 export const rIgnore =
-  // eslint-disable-next-line max-len
   /^((Merge pull request)|(Merge remote-tracking branch)|(Automatic merge)|((Auto-merged|Merged) (.*?) (in|into) )|(Merge branch)|(R|r)evert|fixup|squash)/;
 
 export const rRepo = /([^/.]+)[/.]+([^/.]+)(?:\.[^/.]+)?$/;

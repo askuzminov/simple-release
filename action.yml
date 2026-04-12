@@ -1,0 +1,26 @@
+name: 'Simple Release'
+description: 'Auto release pipeline for npm packages with zero dependencies'
+branding:
+  icon: 'package'
+  color: 'green'
+
+inputs:
+  args:
+    description: 'Arguments to pass to simple-release (e.g. "publish-npmjs publish-github")'
+    required: false
+    default: ''
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '22'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Run simple-release
+      shell: bash
+      run: npx @askuzminov/simple-release ${{ inputs.args }}

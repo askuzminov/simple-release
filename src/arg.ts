@@ -18,6 +18,13 @@ export const ARG = arg<{
   '--version'?: string;
   '--source-repo'?: string;
   '--release-repo'?: string;
+  '--workspace': string[];
+  'no-workspace': boolean;
+  '--contents'?: string;
+  '--cascade': 'full' | 'lazy' | 'none';
+  'dry-run': boolean;
+  verbose: boolean;
+  provenance: boolean;
 }>({
   help: false,
   prerelease: false,
@@ -35,6 +42,13 @@ export const ARG = arg<{
   '--version': undefined,
   '--source-repo': undefined,
   '--release-repo': undefined,
+  '--workspace': [],
+  'no-workspace': false,
+  '--contents': undefined,
+  '--cascade': 'full',
+  'dry-run': false,
+  verbose: false,
+  provenance: false,
 });
 
 if (ARG.help) {
@@ -63,6 +77,13 @@ if (ARG.help) {
   log('info', '--file', "Filter files for include/exclude, for example: --file=src --file=types --file ':!dist'");
   log('info', '--version', 'Custom format for version, for example: --version v{VERSION}');
   log('info', '--source-repo', 'Custom path to links for sourcecode: --source-repo myorg/somepackage');
-  log('info', '--release-repo', 'Custom path to links for release notes: --source-repo myorg/somepackage');
+  log('info', '--release-repo', 'Custom path to links for release notes: --release-repo myorg/somepackage');
+  log('info', '--workspace', 'Select specific packages in monorepo: --workspace @org/pkg1 --workspace pkg2');
+  log('info', 'no-workspace', 'Force single-package mode even in monorepo');
+  log('info', '--contents', 'Publish from subdirectory: --contents dist');
+  log('info', '--cascade', 'Cross-package deps: auto (default), lazy, none');
+  log('info', 'dry-run', 'Show what would happen without making changes');
+  log('info', 'verbose', 'Show detailed output');
+  log('info', 'provenance', 'Generate provenance attestation when publishing (npm/npmjs.org)');
   process.exit(0);
 }

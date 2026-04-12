@@ -6,9 +6,15 @@ import { isText, sp } from './utils';
 const DELIM = '###DELIM%!@^%$###';
 const ESCAPE = '###ESCAPE%!@^%$###';
 
-export const fetchAll = () => sp('git', ['fetch', 'remote', '--tags']);
-
 export const getHash = () => sp('git', ['rev-parse', 'HEAD']);
+
+export async function checkBranch(): Promise<void> {
+  try {
+    await sp('git', ['symbolic-ref', 'HEAD']);
+  } catch {
+    log('warn', 'Git', 'Detached HEAD detected. Git commit/push may fail. Checkout a branch first.');
+  }
+}
 
 export const getTag = async (match?: string): Promise<string> => {
   try {
@@ -22,7 +28,13 @@ export const getTag = async (match?: string): Promise<string> => {
   } catch (e) {
     log('warn', 'Tags', 'Error getting tags', e);
     log('warn', 'Tags', 'Get all history');
-    return sp('git', ['rev-list', '--max-parents=0', 'HEAD']);
+    try {
+      return await sp('git', ['rev-list', '--max-parents=0', 'HEAD']);
+    } catch {
+      log('warn', 'Tags', 'No commits found, using empty tree');
+      const nullDevice = process.platform === 'win32' ? 'NUL' : '/dev/null';
+      return sp('git', ['hash-object', '-t', 'tree', nullDevice]);
+    }
   }
 };
 
@@ -30,7 +42,6 @@ export const getCommitsRaw = (from: string, to: string, files?: string[]) =>
   sp('git', [
     'log',
     `${from}..${to}`,
-    // eslint-disable-next-line max-len
     `--pretty=format:{ "short": ${ESCAPE}%h${ESCAPE}, "hash": ${ESCAPE}%H${ESCAPE}, "title": ${ESCAPE}%s${ESCAPE}, "body": ${ESCAPE}%b${ESCAPE} }${DELIM}`,
     ...(files ? ['--'].concat(files) : []),
   ]);
@@ -72,12 +83,34 @@ export const writeGit = async (version: string) => {
   log('ok', 'Git', `Commit version ${version}`);
   await sp('git', ['commit', '-m', `chore(release): ${version} [skip ci]`], { stdio: 'inherit' });
 
-  log('ok', 'Git', `Tag version ${version}`);
-  await sp('git', ['tag', '-a', version, '-m', `Release ${version}`], { stdio: 'inherit' });
+  await createTag(version);
 };
+
+async function createTag(tag: string): Promise<void> {
+  const exists = await sp('git', ['tag', '-l', tag]).then(out => out !== '');
+  if (exists) {
+    log('warn', 'Git', `Tag ${tag} already exists, skipping`);
+    return;
+  }
+  log('ok', 'Git', `Tag ${tag}`);
+  await sp('git', ['tag', '-a', tag, '-m', `Release ${tag}`], { stdio: 'inherit' });
+}
 
 export const pushGit = async () => {
   log('ok', 'Git', 'Push tags');
   await sp('git', ['push'], { stdio: 'inherit' });
   await sp('git', ['push', '--tags'], { stdio: 'inherit' });
 };
+
+export async function writeWorkspaceGit(releases: { name: string; version: string }[]): Promise<void> {
+  await sp('git', ['add', '-A'], { stdio: 'inherit' });
+
+  const lines = releases.map(r => `- ${r.name}@${r.version}`).join('\n');
+  const msg = `chore(release): publish [skip ci]\n\n${lines}`;
+  log('ok', 'Git', `Commit workspace release`);
+  await sp('git', ['commit', '-m', msg], { stdio: 'inherit' });
+
+  for (const r of releases) {
+    await createTag(`${r.name}@${r.version}`);
+  }
+}

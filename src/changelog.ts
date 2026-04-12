@@ -3,10 +3,10 @@ import { join } from 'path';
 
 import { CHANGELOG_FILE } from './config';
 
-export async function getChangelog(title: string, path = CHANGELOG_FILE) {
+export async function getChangelog(title: string, dir = process.cwd()) {
   let changelog = '';
   try {
-    changelog = await fs.readFile(join(process.cwd(), path), 'utf8');
+    changelog = await fs.readFile(join(dir, CHANGELOG_FILE), 'utf8');
   } catch {
     //
   }
@@ -18,6 +18,6 @@ export async function getChangelog(title: string, path = CHANGELOG_FILE) {
   return changelog;
 }
 
-export async function writeChangelog(text: string, path = CHANGELOG_FILE) {
-  await fs.writeFile(join(process.cwd(), path), text, 'utf8');
+export async function writeChangelog(text: string, dir = process.cwd()) {
+  await fs.writeFile(join(dir, CHANGELOG_FILE), text, 'utf8');
 }
