@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.3.1](https://github.com/askuzminov/simple-release/compare/v1.3.0...v1.3.1) (2026-04-22)
+
+### Bug Fixes
+
+- **lint**: use path.resolve instead of path.join for COMMIT_EDITMSG (#4) ([c51540f](https://github.com/askuzminov/simple-release/commit/c51540f813d1ef751946b6bc0e665ab2d37965a2))
+
+  path.join(cwd, absolutePath) silently mangles the path when
+  GIT_PARAMS/HUSKY_GIT_PARAMS is an absolute path — Node's path.join
+  treats the leading slash of the second argument as just another
+  separator, not a root marker, producing cwd + absolutePath.
+  
+  In git worktrees, Git provides the COMMIT_EDITMSG path as absolute
+  (pointing into .git/worktrees/<name>/COMMIT_EDITMSG). This caused a
+  readFileSync ENOENT crash on every commit in a worktree.
+  
+  path.resolve() handles both cases correctly:
+  - absolute path → returned as-is
+  - relative path → resolved from cwd, same as before
+
+
 ## [v1.3.0](https://github.com/askuzminov/simple-release/compare/v1.2.0...v1.3.0) (2026-04-12)
 
 ### Features
