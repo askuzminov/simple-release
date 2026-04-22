@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { resolve } from 'path';
 
 import { rIgnore, rParse, whitelist } from './config';
 
 const { GIT_PARAMS, HUSKY_GIT_PARAMS } = process.env;
 
-const commit = readFileSync(join(process.cwd(), GIT_PARAMS ?? HUSKY_GIT_PARAMS ?? '.git/COMMIT_EDITMSG'), 'utf8');
+const commit = readFileSync(resolve(GIT_PARAMS ?? HUSKY_GIT_PARAMS ?? '.git/COMMIT_EDITMSG'), 'utf8');
 
 const parsed = rParse.exec(commit);
 const example = `
