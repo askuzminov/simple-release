@@ -74,6 +74,22 @@ async function updateLockfile(file: string, version: string, dir = process.cwd()
   log('ok', 'Version', `Updated ${file}`);
 }
 
+export async function syncVersion(dir: string, version: string): Promise<void> {
+  const filePath = join(dir, 'package.json');
+  const raw = await fs.readFile(filePath, 'utf8');
+  const indent = detectIndent(raw);
+  const pkg = parseJSON<Pack>(raw);
+
+  if (pkg.version === version) {
+    return;
+  }
+
+  pkg.version = version;
+
+  await fs.writeFile(filePath, `${JSON.stringify(pkg, undefined, indent)}\n`, 'utf8');
+  log('ok', 'Version', `Synced ${version} into ${filePath}`);
+}
+
 export function detectIndent(content: string): number {
   const match = /^[ ]+/m.exec(content);
   return match !== null ? match[0].length : 2;

@@ -85,6 +85,7 @@ simple-release verbose publish-npmjs
 | `publish-github` | Publish in Github registry |
 | `publish-npmjs` | Publish in Npmjs registry |
 | `--publish-custom URL` | Publish in custom registry |
+| `--contents DIR` | Publish from subdirectory (e.g. `dist`) |
 
 ```bash
 simple-release publish-github publish-npmjs
@@ -93,6 +94,10 @@ simple-release --publish-custom https://your_domain/npm/ --publish-custom https:
 # Publish to all registries at once
 simple-release publish-github publish-npmjs --publish-custom https://your_domain/npm/
 ```
+
+`--contents` publishes that subdirectory as the package root, in single-package and workspace mode
+alike. The released version is written into `<dir>/package.json` right before publishing, so a `dist/`
+built before the bump still publishes the right version.
 
 ### Mode
 
@@ -213,7 +218,6 @@ When workspaces are detected, simple-release will:
 | --- | --- |
 | `no-workspace` | Force single-package mode even in a monorepo |
 | `--workspace NAME` | Select specific packages |
-| `--contents DIR` | Publish from subdirectory (e.g. `dist`) |
 | `--cascade MODE` | Cross-package dependency updates |
 
 ### Cascade modes

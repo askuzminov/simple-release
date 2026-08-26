@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { checkBranch, getCommitsRaw, getHash, getTag, parseCommits, writeGit, writeWorkspaceGit } from '../src/git';
-import { writeVersion } from '../src/package';
+import { syncVersion, writeVersion } from '../src/package';
 import { Pack, PackageContext } from '../src/types';
 import { parseJSON, retry, sp } from '../src/utils';
 import { parse } from '../src/parser';
@@ -407,6 +407,46 @@ describe('writeVersion after preversion hook modifies package.json', () => {
     const result = JSON.parse(await fs.readFile(pkgPath, 'utf8')) as Pack;
     assert.equal(result.version, '2.0.0');
     assert.equal(result.description, 'added');
+  });
+});
+
+describe('syncVersion', () => {
+  it('should write the version and keep every other field', async () => {
+    const dir = join(tempDir, 'dist');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, 'package.json'),
+      '{\n  "name": "test-pkg",\n  "version": "1.0.0",\n  "main": "./index.js"\n}\n'
+    );
+
+    await syncVersion(dir, '1.1.0');
+
+    const raw = await fs.readFile(join(dir, 'package.json'), 'utf8');
+    const pack = parseJSON<Pack>(raw);
+    assert.equal(pack.version, '1.1.0');
+    assert.equal(pack.main, './index.js');
+    assert.equal(pack.name, 'test-pkg');
+  });
+
+  it('should keep the original indent', async () => {
+    const dir = join(tempDir, 'dist');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'package.json'), '{\n    "version": "1.0.0"\n}\n');
+
+    await syncVersion(dir, '1.1.0');
+
+    assert.equal(await fs.readFile(join(dir, 'package.json'), 'utf8'), '{\n    "version": "1.1.0"\n}\n');
+  });
+
+  it('should not rewrite an already matching version', async () => {
+    const dir = join(tempDir, 'dist');
+    mkdirSync(dir, { recursive: true });
+    const raw = '{"version":"1.1.0","main":"./index.js"}';
+    writeFileSync(join(dir, 'package.json'), raw);
+
+    await syncVersion(dir, '1.1.0');
+
+    assert.equal(await fs.readFile(join(dir, 'package.json'), 'utf8'), raw);
   });
 });
 

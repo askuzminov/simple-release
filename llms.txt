@@ -37,6 +37,7 @@ npm i @askuzminov/simple-release
 - `publish-github` — GitHub Packages registry
 - `publish-npmjs` — npmjs.org registry
 - `--publish-custom URL` — custom registry
+- `--contents DIR` — publish from subdirectory (single package and workspace; released version is synced into `DIR/package.json`)
 
 ### Mode
 - `--mode publish` (default)
@@ -54,7 +55,6 @@ npm i @askuzminov/simple-release
 ### Workspace (monorepo)
 - `no-workspace` — force single-package mode
 - `--workspace NAME` — select specific packages (repeatable)
-- `--contents DIR` — publish from subdirectory
 - `--cascade MODE` — cross-package deps: `full` (default), `lazy`, `none`
 
 ## Commit format

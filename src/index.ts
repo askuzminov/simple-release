@@ -5,8 +5,6 @@ process.on('unhandledRejection', error => {
   process.exit(1);
 });
 
-import { join } from 'path';
-
 import { ARG } from './arg';
 import { getChangelog, writeChangelog } from './changelog';
 import { cascadeDeps, detectPackageChanges, PackageChanges } from './changes';
@@ -24,9 +22,10 @@ import {
 } from './git';
 import { log } from './log';
 import { makeMD } from './markdown';
-import { getNextVersion, getVersionType, nextVersion, publish } from './npm';
+import { getNextVersion, getVersionType, nextVersion } from './npm';
 import { getPack, getVersion, readPackageConfig, runScript, writeVersion } from './package';
 import { parse } from './parser';
+import { publishPackage } from './publish';
 import { release } from './release';
 import { inc } from './semver';
 import { PackageContext } from './types';
@@ -128,6 +127,16 @@ async function runSingle(pack: Awaited<ReturnType<typeof getPack>>, url: string)
     await nextVersion(config, ARG.prerelease);
     const version = formatTitle(await getVersion(), ARG['--version']);
     const md = makeMD({ config, version, tag, date, url });
+    const errors: string[] = [];
+    const pkgName = isText(pack.name) ? (pack.name as string) : 'root';
+    const publishCtx: PackageContext = {
+      dir: process.cwd(),
+      name: pkgName,
+      version: '',
+      pack,
+      tagPrefix: 'v',
+      files: [],
+    };
 
     log('ok', 'Version', version);
     if (VERBOSE) {
@@ -157,13 +166,7 @@ async function runSingle(pack: Awaited<ReturnType<typeof getPack>>, url: string)
       }
     }
 
-    const errors: string[] = [];
-    const pkgName = isText(pack.name) ? (pack.name as string) : 'root';
-    await publishPackage(
-      { dir: process.cwd(), name: pkgName, version: '', pack, tagPrefix: 'v', files: [] },
-      undefined,
-      errors
-    );
+    await publishPackage(publishCtx, errors);
 
     await runScript(pack, 'postversion', await getVersion());
 
@@ -236,7 +239,7 @@ async function runWorkspace(packages: PackageContext[], rootPack: Awaited<Return
 
   const publishErrors: string[] = [];
   for (const r of releases) {
-    await publishPackage(r.ctx, ARG['--contents'], publishErrors);
+    await publishPackage(r.ctx, publishErrors);
     await runScript(r.ctx.pack, 'postversion', r.version, r.ctx.dir);
   }
 
@@ -303,31 +306,6 @@ async function bumpPackages(changed: PackageChanges[], date: string, url: string
   }
 
   return releases;
-}
-
-async function publishPackage(ctx: PackageContext, contents?: string, errors?: string[]): Promise<void> {
-  const dir = isText(contents) ? join(ctx.dir, contents) : ctx.dir;
-
-  if (ARG['publish-github']) {
-    await publish('https://npm.pkg.github.com', ARG.prerelease, dir, ARG.provenance).catch(e => {
-      log('error', 'Publish', `${ctx.name} failed: npm.pkg.github.com — ${e}`);
-      errors?.push(`${ctx.name} → npm.pkg.github.com`);
-    });
-  }
-
-  if (ARG['publish-npmjs']) {
-    await publish('https://registry.npmjs.org', ARG.prerelease, dir, ARG.provenance).catch(e => {
-      log('error', 'Publish', `${ctx.name} failed: registry.npmjs.org — ${e}`);
-      errors?.push(`${ctx.name} → registry.npmjs.org`);
-    });
-  }
-
-  for (const customPublish of ARG['--publish-custom']) {
-    await publish(customPublish, ARG.prerelease, dir, ARG.provenance).catch(e => {
-      log('error', 'Publish', `${ctx.name} failed: ${customPublish} — ${e}`);
-      errors?.push(`${ctx.name} → ${customPublish}`);
-    });
-  }
 }
 
 void run();
