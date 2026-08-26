@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit guidelines.
 
+## [v1.3.2](https://github.com/askuzminov/simple-release/compare/v1.3.1...v1.3.2) (2026-08-26)
+
+### Bug Fixes
+
+- **publish**: honor --contents in single-package mode ([26c6dae](https://github.com/askuzminov/simple-release/commit/26c6dae91252c8474dfe06ccf32d8cd32a4e35e3))
+
 ## [v1.3.1](https://github.com/askuzminov/simple-release/compare/v1.3.0...v1.3.1) (2026-04-22)
 
 ### Bug Fixes
